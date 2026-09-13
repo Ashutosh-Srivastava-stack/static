@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tech Titans Library — Digital Academic Sanctuary</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: "#0B1020",
+                        midnight: "#10172A",
+                        panel: "#151E35",
+                        panel2: "#1B2744",
+                        violet: "#7C5CFC",
+                        purple: "#9B7BFF",
+                        cyan: "#38D9FF",
+                        mint: "#54E6B2",
+                        textmain: "#F4F7FF",
+                        textmuted: "#9BA8C7"
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        boho: ["Caveat", "cursive"]
+                    },
+                    boxShadow: {
+                        glow: "0 0 40px rgba(124,92,252,.18)",
+                        cyanGlow: "0 0 40px rgba(56,217,255,.12)"
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --ink: #0B1020;
+            --midnight: #10172A;
+            --panel: #151E35;
+            --panel2: #1B2744;
+            --violet: #7C5CFC;
+            --purple: #9B7BFF;
+            --cyan: #38D9FF;
+            --mint: #54E6B2;
+            --text: #F4F7FF;
+            --muted: #9BA8C7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(124,92,252,.13),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 90% 20%,
+                    rgba(56,217,255,.08),
+                    transparent 25%
+                ),
+                var(--ink);
+            color: var(--text);
+            font-family: "Inter", sans-serif;
+        }
+
+        ::selection {
+            background: var(--violet);
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--ink);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+                var(--violet),
+                var(--cyan)
+            );
+            border-radius: 10px;
+        }
+
+        .glass {
+            background: rgba(21, 30, 53, .72);
+            border: 1px solid rgba(155,123,255,.16);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #9B7BFF,
+                #38D9FF
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-grid {
+            background-image:
+                linear-gradient(
+                    rgba(124,92,252,.05) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(124,92,252,.05) 1px,
+                    transparent 1px
+                );
+            background-size: 45px 45px;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            pointer-events: none;
+        }
+
+        .orb-one {
+            width: 280px;
+            height: 280px;
+            background: rgba(124,92,252,.18);
+            top: 80px;
+            left: -80px;
+        }
+
+        .orb-two {
+            width: 260px;
+            height: 260px;
+            background: rgba(56,217,255,.12);
+            right: -80px;
+            top: 250px;
+        }
+
+        .note-card {
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+
+        .note-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(155,123,255,.45);
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+        }
+
+        .stat-card {
+            transition: transform .2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .hidden-section {
+            display: none !important;
+        }
+
+        .toast {
+            animation: toastIn .3s ease forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-dot {
+            animation: pulseDot 1.8s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .35; }
+        }
+
+        input, select, textarea {
+            color-scheme: dark;
+        }
+
+        .pic{
+            margin-left: 100px;
+            margin-top: 20px;
+            border-radius: 50%;
+            height: 20vh;
+            width: 10vw;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3 w-[calc(100%-40px)] sm:w-auto"></div>
+
+<!-- NAVIGATION -->
+<nav class="sticky top-0 z-50 bg-ink/80 backdrop-blur-xl border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#home" class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br from-violet to-purple shadow-glow">
+                    <i class="fa-solid fa-feather-pointed text-white"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-boho font-bold">Tech Titans library</div>
+                    <div class="text-[9px] tracking-[.25em] uppercase text-textmuted">Digital Academic Sanctuary</div>
+                </div>
+            </a>
+
+            <!-- Desktop navigation -->
+            <div class="hidden md:flex items-center gap-7 text-sm">
+                <a href="#home" class="text-textmuted hover:text-white transition">Home</a>
+                <a href="#features" class="text-textmuted hover:text-white transition">Features</a>
+                <a href="#faq" class="text-textmuted hover:text-white transition">FAQ</a>
+                <a href="#contact" class="text-textmuted hover:text-white transition">Connect</a>
+                <a href="#about" class="text-textmuted hover:text-white transition">About</a>
+                <a href="#portal" class="px-5 py-2.5 rounded-xl bg-violet hover:bg-purple text-white font-bold transition shadow-glow">
+                    Portal Access
+                </a>
+            </div>
+
+            <!-- Mobile button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-white text-2xl" aria-label="Open menu">
+                <i id="hamburger-icon" class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden pb-6 space-y-3">
+            <a href="#home" onclick="toggleMobileMenu()" class="block p-3 rounded-xl hover:bg-panel">Home</a>
+            <a href="#features" onclick="toggleMobileMenu()" class="block p-3 rounded-xl hover:bg-panel">Features</a>
+            <a href="#faq" onclick="toggleMobileMenu()" class="block p-3 rounded-xl hover:bg-panel">FAQ</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="block p-3 rounded-xl hover:bg-panel">Connect</a>
+            <a href="#about" onclick="toggleMobileMenu()" class="block p-3 rounded-xl hover:bg-panel">About</a>
+            <a href="#portal" onclick="toggleMobileMenu()" class="block text-center bg-violet rounded-xl p-3 font-bold">Portal Access</a>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="relative min-h-[90vh] flex items-center overflow-hidden hero-grid">
+        <div class="orb orb-one"></div>
+        <div class="orb orb-two"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-24">
+            <div class="max-w-4xl mx-auto text-center">
+
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs text-textmuted mb-7">
+                    <span class="w-2 h-2 bg-mint rounded-full pulse-dot"></span>
+                    Built for modern learners
+                </div>
+
+                <h1 class="text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight leading-[1.05]">
+                    Your Knowledge.
+                    <span class="block font-boho font-bold gradient-text text-6xl sm:text-7xl lg:text-9xl">
+                        Your Sanctuary.
+                    </span>
+                </h1>
+
+                <p class="max-w-2xl mx-auto mt-7 text-textmuted text-base sm:text-lg leading-8">
+                    A modern academic platform for discovering verified notes, tracking coursework, and connecting students with faculty resources in one organized digital space.
+                </p>
+
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mt-9">
+                    <a href="#portal" class="px-8 py-4 rounded-2xl bg-violet hover:bg-purple transition font-bold shadow-glow flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lock"></i>
+                        Enter Secure Portal
+                    </a>
+                    <a href="#features" class="px-8 py-4 rounded-2xl glass hover:bg-panel2 transition font-bold flex items-center justify-center gap-2">
+                        Explore Platform
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </a>
+                </div>
+
+                <!-- Live Animated Counters -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+                    <div class="glass rounded-2xl p-5 stat-card">
+                        <div class="text-3xl font-extrabold text-purple stat-counter" data-target="2450">0</div>
+                        <div class="text-xs text-textmuted mt-1">Enrolled Students</div>
+                    </div>
+                    <div class="glass rounded-2xl p-5 stat-card">
+                        <div class="text-3xl font-extrabold text-cyan stat-counter" data-target="18">0</div>
+                        <div class="text-xs text-textmuted mt-1">Faculty Admins</div>
+                    </div>
+                    <div class="glass rounded-2xl p-5 stat-card">
+                        <div class="text-3xl font-extrabold text-mint stat-counter" data-target="380">0</div>
+                        <div class="text-xs text-textmuted mt-1">Verified Notes</div>
+                    </div>
+                    <div class="glass rounded-2xl p-5 stat-card">
+                        <div class="text-3xl font-extrabold text-purple stat-counter" data-target="99">0</div>
+                        <div class="text-xs text-textmuted mt-1">Satisfaction %</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section id="features" class="py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <span class="font-boho text-3xl text-purple">Crafted for learning</span>
+                <h2 class="text-3xl sm:text-5xl font-bold mt-2">Everything in one sanctuary</h2>
+                <p class="text-textmuted max-w-2xl mx-auto mt-4">
+                    Designed to make academic resources easier to discover, organize, and manage.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-violet/15 text-purple flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Verified Notes</h3>
+                    <p class="text-textmuted mt-3 leading-7">
+                        Keep subject notes organized and accessible from one central academic library.
+                    </p>
+                </div>
+
+                <div class="glass rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan/10 text-cyan flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Faculty Publishing</h3>
+                    <p class="text-textmuted mt-3 leading-7">
+                        Faculty admins can publish new coursework, syllabi, and keep students updated in real time.
+                    </p>
+                </div>
+
+                <div class="glass rounded-3xl p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-mint/10 text-mint flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-xl font-bold">Admin Audit Controls</h3>
+                    <p class="text-textmuted mt-3 leading-7">
+                        Audit login activity, monitor uploads, and manage platform permissions effortlessly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PORTAL SECTION -->
+    <section id="portal" class="py-24 bg-midnight/40 border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <span class="font-boho text-3xl text-purple">Secure Gateway</span>
+                <h2 class="text-3xl sm:text-5xl font-bold mt-2">Tech Titans library</h2>
+                <p class="text-textmuted mt-3">Sign in to access your academic workspace.</p>
+            </div>
+
+            <!-- LOGIN SCREEN -->
+            <div id="login-screen" class="max-w-md mx-auto glass rounded-3xl p-7 sm:p-9 shadow-glow">
+                
+                <!-- Role Selector Tabs -->
+                <div class="flex bg-ink rounded-2xl p-1.5 mb-7">
+                    <button id="tab-student" onclick="switchLoginTab('student')" class="flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition">
+                        Student
+                    </button>
+                    <button id="tab-admin" onclick="switchLoginTab('admin')" class="flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition">
+                        Admin / Faculty
+                    </button>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-5">
+                    <input type="hidden" id="login-role" value="student">
+
+                    <div>
+                        <label id="id-label" class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">
+                            Student ID
+                        </label>
+                        <input
+                            type="text"
+                            id="login-id"
+                            required
+                            placeholder="e.g. STU-8821"
+                            class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet transition text-sm"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">
+                            Access Key / Password
+                        </label>
+                        <input
+                            type="password"
+                            id="login-pass"
+                            required
+                            placeholder="••••••••"
+                            class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet transition text-sm"
+                        >
+                    </div>
+
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-violet to-purple text-white font-bold shadow-glow hover:opacity-95 transition mt-2">
+                        Enter library
+                    </button>
+
+                    <div class="text-center text-xs text-textmuted pt-2">
+                        Demo Credentials: Use any ID and password to sign in.
+                    </div>
+                </form>
+            </div>
+
+            <!-- DASHBOARD CONTAINER (Hidden by Default) -->
+            <div id="dashboard-screen" class="hidden-section max-w-6xl mx-auto">
+                
+                <!-- Dashboard Header Banner -->
+                <div class="glass rounded-3xl p-6 sm:p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet/20 text-purple text-xs font-semibold mb-2">
+                            <span class="w-2 h-2 rounded-full bg-mint"></span>
+                            Session Active
+                        </div>
+                        <h3 id="user-display-name" class="text-2xl sm:text-3xl font-extrabold">Welcome Back</h3>
+                        <p id="user-display-role" class="text-textmuted text-sm mt-1">Role: Student</p>
+                    </div>
+                    <button onclick="handleLogout()" class="px-5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-sm font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Sign Out
+                    </button>
+                </div>
+
+                <!-- STUDENT DASHBOARD VIEW -->
+                <div id="student-view" class="space-y-8">
+                    <!-- Search & Filter Bar -->
+                    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row gap-4 justify-between items-center">
+                        <div class="relative w-full md:w-96">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-textmuted"></i>
+                            <input
+                                type="text"
+                                id="notes-search"
+                                oninput="renderNotes()"
+                                placeholder="Search topic or code..."
+                                class="w-full bg-ink/80 border border-white/10 rounded-xl pl-11 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet"
+                            >
+                        </div>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <label class="text-xs text-textmuted font-semibold whitespace-nowrap">Subject:</label>
+                            <select id="notes-filter" onchange="renderNotes()" class="w-full md:w-auto bg-ink/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet">
+                                <option value="ALL">All Subjects</option>
+                                <option value="PY">Python</option>
+                                <option value="ITW">Internet Technology and Web Development</option>
+                                <option value="ET">Emerging Technology</option>
+                                <option value="SE">Software Engineering</option>
+                                <option value="OS">Operating System</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Notes Grid -->
+                    <div id="notes-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+
+                <!-- ADMIN DASHBOARD VIEW -->
+                <div id="admin-view" class="hidden-section space-y-8">
+                    <div class="grid lg:grid-cols-3 gap-8">
+                        
+                        <!-- Note Publishing Form -->
+                        <div class="glass rounded-3xl p-7 lg:col-span-1 h-fit">
+                            <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-file-circle-plus text-purple"></i>
+                                Publish New Resource
+                            </h4>
+                            <form onsubmit="handlePublishNote(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-textmuted mb-1">Title</label>
+                                    <input type="text" id="pub-title" required placeholder="e.g. Data Structures & Algorithms" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-textmuted mb-1">Subject Category</label>
+                                    <select id="pub-category" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none">
+                                        <option value="PY">Python</option>
+                                        <option value="ITW">Internet Technology and Web Development</option>
+                                        <option value="ET">Emerging Technology</option>
+                                        <option value="SE">Software Engineering</option>
+                                        <option value="OS">Operating System</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-textmuted mb-1">Summary / Abstract</label>
+                                    <textarea id="pub-desc" rows="3" required placeholder="Brief description of materials..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-textmuted mb-1">Download Link / URL</label>
+                                    <input type="url" id="pub-url" required placeholder="https://..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none">
+                                </div>
+                                <button type="submit" class="w-full py-3 rounded-xl bg-violet hover:bg-purple font-bold text-white shadow-glow transition text-sm">
+                                    Publish to Vault
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- System Audit Logs -->
+                        <div class="glass rounded-3xl p-7 lg:col-span-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="text-xl font-bold flex items-center gap-2">
+                                    <i class="fa-solid fa-list-check text-cyan"></i>
+                                    System Security & Audit Logs
+                                </h4>
+                                <span class="text-xs text-mint bg-mint/10 border border-mint/20 px-3 py-1 rounded-full">Live Monitor</span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead>
+                                        <tr class="border-b border-white/10 text-textmuted text-xs uppercase">
+                                            <th class="pb-3">Timestamp</th>
+                                            <th class="pb-3">User</th>
+                                            <th class="pb-3">Action</th>
+                                            <th class="pb-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="audit-log-table" class="divide-y divide-white/5"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="py-24 bg-midnight/30">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <span class="font-boho text-3xl text-purple">Clarifications</span>
+                <h2 class="text-3xl sm:text-5xl font-bold mt-2">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="space-y-4">
+                <div class="glass rounded-2xl p-6 cursor-pointer" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-lg">How are study materials and notes verified?</h4>
+                        <i class="fa-solid fa-chevron-down text-textmuted transition-transform"></i>
+                    </div>
+                    <p class="text-textmuted text-sm mt-3 hidden">
+                        Notes uploaded to EduVault undergo review by verified faculty admins and peer moderators to ensure academic integrity and syllabus alignment before being tagged as verified.
+                    </p>
+                </div>
+
+                <div class="glass rounded-2xl p-6 cursor-pointer" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-lg">Can students contribute their own notes?</h4>
+                        <i class="fa-solid fa-chevron-down text-textmuted transition-transform"></i>
+                    </div>
+                    <p class="text-textmuted text-sm mt-3 hidden">
+                        Yes! Students can submit their coursework notes to the review queue. Once approved by a faculty admin, notes are added to the vault and credited to the student.
+                    </p>
+                </div>
+
+                <div class="glass rounded-2xl p-6 cursor-pointer" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-lg">How does the Admin Portal work?</h4>
+                        <i class="fa-solid fa-chevron-down text-textmuted transition-transform"></i>
+                    </div>
+                    <p class="text-textmuted text-sm mt-3 hidden">
+                        Faculty members signing in with Admin credentials gain access to real-time publishing tools, download analytics, and full security audit trails for all active users.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="py-24">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass rounded-3xl p-8 sm:p-12 border border-white/10">
+                <div class="text-center mb-10">
+                    <span class="font-boho text-3xl text-purple">Get in touch</span>
+                    <h2 class="text-3xl font-bold mt-1">Connect with Tech Titans Support</h2>
+                    <p class="text-textmuted text-sm mt-2">Have a question or need administrative assistance? Send us a message.</p>
+                </div>
+
+                <form onsubmit="handleContactSubmit(event)" class="space-y-5">
+                    <div class="grid sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-textmuted uppercase mb-2">Full Name</label>
+                            <input type="text" required placeholder="Jane Doe" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-textmuted uppercase mb-2">Academic Email</label>
+                            <input type="email" required placeholder="jane@university.edu" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-textmuted uppercase mb-2">Subject</label>
+                        <input type="text" required placeholder="Inquiry regarding access" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-textmuted uppercase mb-2">Message</label>
+                        <textarea rows="4" required placeholder="Describe your request..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-violet"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-4 rounded-xl bg-violet hover:bg-purple font-bold text-white shadow-glow transition text-sm">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="glass rounded-3xl p-8 sm:p-12 border border-white/10">
+            <h2 class="text-3xl font-bold mt-1" style="margin-left: 100px;">Admins & Sourcer</h2><br>
+            <img class="pic" src="student.jpg" alt="miss">
+            <img class="pic" src="Ayush1.png" alt="miss">
+        </div>
+    </section>
+
+</main>
+
+<!-- RESOURCE VIEWER MODAL (Opens on Subject Card Click) -->
+<div id="resource-modal" class="fixed inset-0 z-[120] bg-ink/90 backdrop-blur-xl hidden-section flex flex-col">
+    <!-- Top Header Bar -->
+    <div class="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-midnight">
+        <div class="flex items-center gap-3">
+            <span id="modal-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-violet/20 text-purple border border-violet/30">
+                CS
+            </span>
+            <h3 id="modal-title" class="text-lg font-bold text-white">Subject Title</h3>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="closeResourceModal()" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-textmuted hover:text-white hover:bg-panel transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Content Layout -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar: List of Topics -->
+        <aside class="w-80 border-r border-white/10 glass p-5 flex flex-col overflow-y-auto hidden md:flex">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-textmuted mb-4">Course Topics</h4>
+            <div id="modal-topic-list" class="space-y-2">
+                <!-- Topics inserted dynamically -->
+            </div>
+        </aside>
+
+        <!-- Main Section: Embedded PDF Page Images -->
+        <main class="flex-1 p-6 overflow-y-auto bg-midnight/60 flex flex-col items-center">
+            <div class="w-full max-w-4xl mb-4 flex justify-between items-center bg-panel px-4 py-2 rounded-xl border border-white/5">
+                <span id="active-topic-title" class="text-sm font-semibold text-purple">Topic Details</span>
+                <span class="text-xs text-textmuted">PDF Document Preview Mode</span>
+            </div>
+            
+            <div id="modal-image-container" class="w-full max-w-4xl space-y-6">
+                <!-- Page images inserted dynamically -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="border-t border-white/5 py-12 bg-ink">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-textmuted text-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-violet/20 flex items-center justify-center text-violet">
+                <i class="fa-solid fa-feather-pointed"></i>
+            </div>
+            <span class="font-boho text-xl text-white">Tech Titans Library</span>
+            <span>— Digital Academic Sanctuary &copy; 2026</span>
+        </div>
+        <div class="flex gap-6">
+            <a href="#home" class="hover:text-white transition">Home</a>
+            <a href="#features" class="hover:text-white transition">Features</a>
+            <a href="#about" class="hover:text-white transition">About</a>
+            <a href="#portal" class="hover:text-white transition">Portal</a>
+        </div>
+    </div>
+</footer>
+
+<!-- External JavaScript File Link -->
+<script src="script.js"></script>
+
+</body>
+</html>
