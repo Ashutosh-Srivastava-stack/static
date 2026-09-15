@@ -280,7 +280,7 @@ function switchLoginTab(role) {
 const STUDENT_KEY = "BCA2026";
 const ADMIN_KEY = "ADMIN2026";
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault(); // Prevents page refresh
 
     const role = document.getElementById("login-role").value;
@@ -305,15 +305,31 @@ function handleLogin(e) {
     };
     localStorage.setItem("eduvault_user", JSON.stringify(currentUser));
 
-    // 3. Add to system audit log
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
-    auditLogs.unshift({
-        time: now,
-        user: nameOrId,
-        action: role === 'admin' ? "Admin Access Granted" : "Student Portal Access",
-        status: "Success"
-    });
-    localStorage.setItem("eduvault_logs", JSON.stringify(auditLogs));
+    // 3. Add to Supabase audit log
+    const actionText = role === 'admin' ? "Admin Access Granted" : "Student Portal Access";
+
+    if (sb) {
+        const { error } = await sb.from("audit_logs").insert([
+            {
+                user_id: nameOrId,
+                action: actionText,
+                status: "Success"
+            }
+        ]);
+        if (error) {
+            console.error("Error inserting audit log:", error);
+        }
+    } else {
+        // Fallback for local testing without Supabase initialized
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
+        auditLogs.unshift({
+            time: now,
+            user: nameOrId,
+            action: actionText,
+            status: "Success"
+        });
+        localStorage.setItem("eduvault_logs", JSON.stringify(auditLogs));
+    }
 
     showToast(`Welcome, ${nameOrId}!`, "success");
 
@@ -617,10 +633,32 @@ async function handlePublishNote(e) {
 }
 
 // --- AUDIT LOGS & EXTRA UI PANELS ---
-function renderAuditLogs() {
+async function renderAuditLogs() {
     const table = $("audit-log-table");
     if (!table) return;
-    table.innerHTML = auditLogs.map(log => `
+
+    let logsToDisplay = auditLogs;
+
+    // Fetch live logs from Supabase table
+    if (sb) {
+        const { data, error } = await sb
+            .from("audit_logs")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (!error && data) {
+            logsToDisplay = data.map(log => ({
+                time: log.created_at ? new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 16) : log.time,
+                user: log.user_id || log.user,
+                action: log.action,
+                status: log.status
+            }));
+        } else if (error) {
+            console.error("Error fetching audit logs from Supabase:", error);
+        }
+    }
+
+    table.innerHTML = logsToDisplay.map(log => `
         <tr class="hover:bg-white/5 transition">
             <td class="py-3 text-textmuted text-xs">${esc(log.time)}</td>
             <td class="py-3 font-semibold text-white">${esc(log.user)}</td>
