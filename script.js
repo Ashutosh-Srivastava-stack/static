@@ -23,6 +23,42 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         author: "Prof. Kailash Sir",
         date: "2026-08-28",
         pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+    },
+    {
+        id: 2,
+        title: "Internet Technology and Web Development",
+        category: "ITW",
+        desc: "Detailed lecture notes covering OSI Model, Firewall, and Java Script.",
+        author: "Prof. Ankita Mam",
+        date: "2026-08-30",
+        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+    },
+    {
+        id: 3,
+        title: "Emerging Technology",
+        category: "ET",
+        desc: "Solutions and notes on Artifical Intelligence and Machine Learning",
+        author: "Prof. Vineet Sir",
+        date: "2026-08-15",
+        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+    },
+    {
+        id: 4,
+        title: "Software Engineering",
+        category: "SE",
+        desc: "SDLC, WATERFALL MODEL, Software Designing methods",
+        author: "Prof. Iqbal Sir",
+        date: "2026-08-22",
+        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+    },
+    {
+        id: 5,
+        title: "Operating System",
+        category: "OS",
+        desc: "Detailed lecture notes covering Process Scheduling, Deadlocks, and Memory Management.",
+        author: "Prof. Rekh Nath Sir",
+        date: "2026-08-27",
+        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
     }
 ];
 
@@ -169,12 +205,11 @@ async function handlePublishNote(e) {
                 // Generate a clean unique filename without extra root folders
                 const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-                // 1. Upload file to 'notes' bucket
+                // Upload using Resumable Chunks (TUS)
                 const { data, error } = await sb.storage
                     .from("notes")
-                    .upload(fileName, file, {
-                        cacheControl: '3600',
-                        upsert: true
+                    .uploadToSignedUrl(fileName, file, {
+                    // TUS uploading strategy for large files
                     });
 
                 if (error) {
