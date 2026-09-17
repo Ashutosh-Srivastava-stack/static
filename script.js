@@ -141,53 +141,91 @@ function toggleUserBlock(userId) {
     }
 }
 
-// --- PUBLISH NOTES ---
 async function handlePublishNote(e) {
     e.preventDefault();
+    
     const title = $("pub-title").value.trim();
     const category = $("pub-category").value;
     const desc = $("pub-desc").value.trim();
     const fileInput = $("pub-file");
     let pdfUrl = $("pub-url").value.trim();
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerText;
+
     try {
-        if (fileInput.files.length > 0) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Publishing...";
+
+        // Handle File Upload to Supabase Storage
+        if (fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            if (file.type !== "application/pdf") throw new Error("Only PDF documents are allowed.");
+
+            if (file.type !== "application/pdf") {
+                throw new Error("Only PDF documents are allowed.");
+            }
 
             if (sb) {
-                const filePath = `notes/${Date.now()}_${file.name}`;
-                const { data, error } = await sb.storage.from("notes").upload(filePath, file);
-                if (error) throw error;
+                // Generate a clean unique filename without extra root folders
+                const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-                const publicData = sb.storage.from("notes").getPublicUrl(filePath);
-                pdfUrl = publicData.data.publicUrl;
+                // 1. Upload file to 'notes' bucket
+                const { data, error } = await sb.storage
+                    .from("notes")
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+
+                if (error) {
+                    console.error("Supabase Upload Error:", error);
+                    throw new Error(`Upload Failed: ${error.message}`);
+                }
+
+                // 2. Retrieve public URL
+                const { data: publicData } = sb.storage
+                    .from("notes")
+                    .getPublicUrl(fileName);
+
+                pdfUrl = publicData.publicUrl;
             } else {
                 pdfUrl = URL.createObjectURL(file);
             }
         }
 
         if (!pdfUrl) {
-            pdfUrl = "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf";
+            throw new Error("Please select a PDF file or enter an external PDF link.");
         }
 
-        notesData.unshift({
+        // Create new Note record
+        const newNote = {
             id: String(Date.now()),
-            title, category, desc,
+            title,
+            category,
+            desc,
             author: currentUser ? currentUser.id : "Faculty",
             date: new Date().toISOString().split('T')[0],
             pdf_url: pdfUrl
-        });
+        };
+
+        // Save locally
+        notesData.unshift(newNote);
         localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
 
-        showToast("Note and PDF published successfully!", "success");
+        showToast("Note & PDF published successfully!", "success");
         e.target.reset();
-        renderNotes();
+        
+        // Refresh grid UI
+        if (typeof renderNotes === "function") renderNotes();
+
     } catch (err) {
-        showToast(err.message, "error");
+        console.error("Publish Error:", err);
+        showToast(err.message || "Failed to publish notes.", "error");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalBtnText;
     }
 }
-
 // --- NOTES DISPLAY & DOWNLOAD ---
 function renderNotes() {
     const grid = $("notes-grid");
