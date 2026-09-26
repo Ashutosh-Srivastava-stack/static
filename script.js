@@ -1,11 +1,46 @@
 /* ==========================================================================
-   TECH TITANS LIBRARY - CONTROLLER WITH FAQ & CONTACT HANDLERS
+   TECH TITANS LIBRARY - FIREBOOK CONTROLLER
    ========================================================================== */
 
-const SUPABASE_URL = "https://jkudnrnzlffcgryeaewu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprdWRucm56bGZmY2dyeWVhZXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDY5NDksImV4cCI6MjEwNDc4Mjk0OX0.GiHyxZg2jLBCtfUSaqmeoMi58DVkSjROs7pDQLad8IY";
+const MASTER_KEY = "NOTES2026";
 
-let sb = null;
+const GITHUB_USERNAME = "Ashutosh-Srivastava-stack";
+const GITHUB_REPO = "eduvault-pdf-storage";
+const GITHUB_PAT = "YOUR_FINE_GRAINED_TOKEN_HERE"; // Fine-grained Personal Access Token
+
+async function uploadPdfToGitHub(file) {
+    // 1. Convert file to base64
+    const reader = new FileReader();
+    const base64Promise = new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(file);
+    });
+    const base64Content = await base64Promise;
+
+    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+
+    // 2. Call your secure Vercel Serverless Function
+    const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            fileName,
+            base64Content
+        })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || "Failed to upload PDF via serverless function.");
+    }
+
+    // 3. Return the public Raw URL
+    return data.pdfUrl;
+}
+
 let currentUser = JSON.parse(localStorage.getItem("eduvault_user")) || null;
 let currentNote = null;
 
@@ -25,40 +60,40 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
     },
     {
-        id: 2,
+        id: "2",
         title: "Internet Technology and Web Development",
         category: "ITW",
-        desc: "Detailed lecture notes covering OSI Model, Firewall, and Java Script.",
+        desc: "Detailed lecture notes covering OSI Model, Firewall, and JavaScript.",
         author: "Prof. Ankita Mam",
         date: "2026-08-30",
-        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
     },
     {
-        id: 3,
+        id: "3",
         title: "Emerging Technology",
         category: "ET",
-        desc: "Solutions and notes on Artifical Intelligence and Machine Learning",
+        desc: "Solutions and notes on Artificial Intelligence and Machine Learning.",
         author: "Prof. Vineet Sir",
         date: "2026-08-15",
-        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
     },
     {
-        id: 4,
+        id: "4",
         title: "Software Engineering",
         category: "SE",
-        desc: "SDLC, WATERFALL MODEL, Software Designing methods",
+        desc: "SDLC, Waterfall Model, and Software Design methods.",
         author: "Prof. Iqbal Sir",
         date: "2026-08-22",
-        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
     },
     {
-        id: 5,
+        id: "5",
         title: "Operating System",
         category: "OS",
         desc: "Detailed lecture notes covering Process Scheduling, Deadlocks, and Memory Management.",
         author: "Prof. Rekh Nath Sir",
         date: "2026-08-27",
-        pdf_url:"https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
     }
 ];
 
@@ -69,48 +104,108 @@ let auditLogs = JSON.parse(localStorage.getItem("eduvault_logs")) || [
 
 function $(id) { return document.getElementById(id); }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    if (typeof supabase !== "undefined" && SUPABASE_URL.startsWith("https://")) {
-        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+document.addEventListener("DOMContentLoaded", () => {
     checkSession();
 });
 
-// --- LOGIN & AUTHENTICATION ---
-function switchLoginTab(role) {
-    $("login-role").value = role;
-    $("tab-student").className = role === "student" ? "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition" : "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition";
-    $("tab-admin").className = role === "admin" ? "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition" : "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition";
-}
+// --- REGISTRATION ---
+async function handleRegister() {
+    const nameElem = $("regName");
+    const keyElem = $("regKey");
+    const res = $("regResult");
 
-async function handleLogin(e) {
-    e.preventDefault();
-    const role = $("login-role").value;
-    const emailOrId = $("login-id").value.trim();
+    const name = nameElem ? nameElem.value.trim() : "";
+    const key = keyElem ? keyElem.value.trim() : "";
 
-    const existingRecord = managedUsers.find(u => u.email === emailOrId || u.id === emailOrId);
-    if (existingRecord && existingRecord.is_blocked) {
-        showToast("Your account has been blocked by an Administrator.", "error");
+    if (!res) return;
+
+    if (key !== MASTER_KEY) {
+        res.className = "error text-red-400 font-semibold text-xs mt-2";
+        res.innerText = "Invalid Invitation Key!";
+        return;
+    }
+    if (!name) {
+        res.className = "error text-red-400 font-semibold text-xs mt-2";
+        res.innerText = "Please enter your name.";
         return;
     }
 
-    if (!existingRecord) {
-        managedUsers.push({ id: emailOrId, email: emailOrId, role: role, is_blocked: false });
-        localStorage.setItem("eduvault_managed_users", JSON.stringify(managedUsers));
+    const generatedPassword = Math.random().toString(36).slice(-8);
+
+    try {
+        res.className = "success text-mint font-semibold text-xs mt-2";
+        res.innerHTML = `<p>Registration Successful! Your Passkey: <strong>${generatedPassword}</strong></p>`;
+    } catch (err) {
+        res.className = "error text-red-400 font-semibold text-xs mt-2";
+        res.innerText = "Error: " + err.message;
+    }
+}
+
+// --- LOGIN & AUTHENTICATION ---
+function switchLoginTab(role) {
+    const roleInput = $("login-role");
+    const tabStudent = $("tab-student");
+    const tabAdmin = $("tab-admin");
+
+    if (roleInput) roleInput.value = role;
+    if (tabStudent) {
+        tabStudent.className = role === "student" 
+            ? "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition" 
+            : "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition";
+    }
+    if (tabAdmin) {
+        tabAdmin.className = role === "admin" 
+            ? "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition" 
+            : "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition";
+    }
+}
+
+async function handleLogin(e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    const role = $("login-role") ? $("login-role").value : "student";
+    const nameInput = $("loginName") || $("login-id");
+    const passInput = $("loginPass");
+    const res = $("loginResult");
+
+    const name = nameInput ? nameInput.value.trim() : "";
+    const pass = passInput ? passInput.value.trim() : "";
+
+    if (!name) {
+        showToast("Please enter a valid Name / ID.", "error");
+        return;
     }
 
-    currentUser = { id: emailOrId, role: role, is_blocked: existingRecord?.is_blocked || false };
-    localStorage.setItem("eduvault_user", JSON.stringify(currentUser));
+    try {
+        // Check local block list fallback
+        const existingRecord = managedUsers.find(u => u.email === name || u.id === name);
+        if (existingRecord && existingRecord.is_blocked) {
+            showToast("Your account has been blocked by an Administrator.", "error");
+            return;
+        }
 
-    auditLogs.unshift({
-        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        user: emailOrId,
-        action: `Portal Access (${role})`
-    });
-    localStorage.setItem("eduvault_logs", JSON.stringify(auditLogs));
+        if (!existingRecord) {
+            managedUsers.push({ id: name, email: name, role: role, is_blocked: false });
+            localStorage.setItem("eduvault_managed_users", JSON.stringify(managedUsers));
+        }
 
-    showToast(`Welcome back, ${emailOrId}!`, "success");
-    checkSession();
+        currentUser = { id: name, role: role, is_blocked: existingRecord?.is_blocked || false };
+        localStorage.setItem("eduvault_user", JSON.stringify(currentUser));
+
+        auditLogs.unshift({
+            time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            user: name,
+            action: `Portal Access (${role})`
+        });
+        localStorage.setItem("eduvault_logs", JSON.stringify(auditLogs));
+
+        showToast(`Welcome back, ${name}!`, "success");
+        checkSession();
+
+    } catch (err) {
+        if (res) res.innerText = "Login error: " + err.message;
+        showToast("Login error: " + err.message, "error");
+    }
 }
 
 function handleLogout() {
@@ -121,24 +216,32 @@ function handleLogout() {
 }
 
 function checkSession() {
-    if (!currentUser) {
-        $("login-screen").classList.remove("hidden-section");
-        $("dashboard-screen").classList.add("hidden-section");
-    } else {
-        $("login-screen").classList.add("hidden-section");
-        $("dashboard-screen").classList.remove("hidden-section");
+    const loginScreen = $("login-screen");
+    const dashboardScreen = $("dashboard-screen");
 
-        $("user-display-name").innerText = `Welcome, ${currentUser.id}`;
-        $("user-display-role").innerText = `Role: ${currentUser.role === 'admin' ? 'Faculty Admin' : 'Student'}`;
+    if (!currentUser) {
+        if (loginScreen) loginScreen.classList.remove("hidden-section");
+        if (dashboardScreen) dashboardScreen.classList.add("hidden-section");
+    } else {
+        if (loginScreen) loginScreen.classList.add("hidden-section");
+        if (dashboardScreen) dashboardScreen.classList.remove("hidden-section");
+
+        const nameElem = $("user-display-name") || $("userDisplayName");
+        const roleElem = $("user-display-role");
+        if (nameElem) nameElem.innerText = currentUser.id;
+        if (roleElem) roleElem.innerText = `Role: ${currentUser.role === 'admin' ? 'Faculty Admin' : 'Student'}`;
+
+        const adminView = $("admin-view");
+        const studentView = $("student-view");
 
         if (currentUser.role === "admin") {
-            $("admin-view").classList.remove("hidden-section");
-            $("student-view").classList.add("hidden-section");
+            if (adminView) adminView.classList.remove("hidden-section");
+            if (studentView) studentView.classList.add("hidden-section");
             renderUserManagement();
             renderAuditLogs();
         } else {
-            $("student-view").classList.remove("hidden-section");
-            $("admin-view").classList.add("hidden-section");
+            if (studentView) studentView.classList.remove("hidden-section");
+            if (adminView) adminView.classList.add("hidden-section");
             renderNotes();
         }
     }
@@ -177,65 +280,45 @@ function toggleUserBlock(userId) {
     }
 }
 
+// --- PUBLISH NOTE ---
+// --- PUBLISH NOTE WITH GITHUB UPLOAD ---
 async function handlePublishNote(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     
-    const title = $("pub-title").value.trim();
-    const category = $("pub-category").value;
-    const desc = $("pub-desc").value.trim();
+    const title = $("pub-title") ? $("pub-title").value.trim() : "";
+    const category = $("pub-category") ? $("pub-category").value : "GEN";
+    const desc = $("pub-desc") ? $("pub-desc").value.trim() : "";
     const fileInput = $("pub-file");
-    let pdfUrl = $("pub-url").value.trim();
+    let pdfUrl = $("pub-url") ? $("pub-url").value.trim() : "";
 
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.innerText;
+    const submitBtn = e.target ? e.target.querySelector('button[type="submit"]') : null;
+    const originalBtnText = submitBtn ? submitBtn.innerText : "Publish";
 
     try {
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Publishing...";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Uploading to GitHub...";
+        }
 
-        // Handle File Upload to Supabase Storage
-        if (fileInput.files && fileInput.files.length > 0) {
+        // Upload PDF directly to GitHub Repository via API
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
 
             if (file.type !== "application/pdf") {
                 throw new Error("Only PDF documents are allowed.");
             }
 
-            if (sb) {
-                // Generate a clean unique filename without extra root folders
-                const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-
-                // Upload using Resumable Chunks (TUS)
-                const { data, error } = await sb.storage
-                    .from("notes")
-                    .uploadToSignedUrl(fileName, file, {
-                    // TUS uploading strategy for large files
-                    });
-
-                if (error) {
-                    console.error("Supabase Upload Error:", error);
-                    throw new Error(`Upload Failed: ${error.message}`);
-                }
-
-                // 2. Retrieve public URL
-                const { data: publicData } = sb.storage
-                    .from("notes")
-                    .getPublicUrl(fileName);
-
-                pdfUrl = publicData.publicUrl;
-            } else {
-                pdfUrl = URL.createObjectURL(file);
-            }
+            // Calls your GitHub upload function!
+            pdfUrl = await uploadPdfToGitHub(file);
         }
 
         if (!pdfUrl) {
             throw new Error("Please select a PDF file or enter an external PDF link.");
         }
 
-        // Create new Note record
         const newNote = {
             id: String(Date.now()),
-            title,
+            title: title || "Untitled Note",
             category,
             desc,
             author: currentUser ? currentUser.id : "Faculty",
@@ -243,22 +326,22 @@ async function handlePublishNote(e) {
             pdf_url: pdfUrl
         };
 
-        // Save locally
         notesData.unshift(newNote);
         localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
 
-        showToast("Note & PDF published successfully!", "success");
-        e.target.reset();
+        showToast("Note published and PDF uploaded to GitHub!", "success");
+        if (e.target && typeof e.target.reset === "function") e.target.reset();
         
-        // Refresh grid UI
-        if (typeof renderNotes === "function") renderNotes();
+        renderNotes();
 
     } catch (err) {
         console.error("Publish Error:", err);
         showToast(err.message || "Failed to publish notes.", "error");
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = originalBtnText;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalBtnText;
+        }
     }
 }
 // --- NOTES DISPLAY & DOWNLOAD ---
@@ -266,14 +349,22 @@ function renderNotes() {
     const grid = $("notes-grid");
     if (!grid) return;
 
-    const search = $("notes-search").value.toLowerCase();
-    const filter = $("notes-filter").value;
+    const searchElem = $("notes-search");
+    const filterElem = $("notes-filter");
+
+    const search = searchElem ? searchElem.value.toLowerCase() : "";
+    const filter = filterElem ? filterElem.value : "ALL";
 
     const filtered = notesData.filter(n => {
         const matchesSearch = n.title.toLowerCase().includes(search) || n.desc.toLowerCase().includes(search);
         const matchesCat = filter === "ALL" || n.category === filter;
         return matchesSearch && matchesCat;
     });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center text-textmuted py-8">No matching notes found.</div>`;
+        return;
+    }
 
     grid.innerHTML = filtered.map(n => `
         <div onclick="openResourceModal('${n.id}')" class="glass rounded-2xl p-6 note-card border border-white/5 flex flex-col justify-between cursor-pointer">
@@ -291,18 +382,26 @@ function renderNotes() {
 }
 
 function openResourceModal(noteId) {
-    currentNote = notesData.find(n => n.id === noteId);
+    currentNote = notesData.find(n => String(n.id) === String(noteId));
     if (!currentNote) return;
 
-    $("modal-badge").innerText = currentNote.category;
-    $("modal-title").innerText = currentNote.title;
-    $("modal-image-container").innerHTML = `<iframe src="${currentNote.pdf_url}" class="w-full h-full rounded-xl border border-white/10"></iframe>`;
+    const modalBadge = $("modal-badge");
+    const modalTitle = $("modal-title");
+    const modalImageContainer = $("modal-image-container");
 
-    $("resource-modal").classList.remove("hidden-section");
+    if (modalBadge) modalBadge.innerText = currentNote.category;
+    if (modalTitle) modalTitle.innerText = currentNote.title;
+    if (modalImageContainer) {
+        modalImageContainer.innerHTML = `<iframe src="${currentNote.pdf_url}" class="w-full h-full rounded-xl border border-white/10" style="min-height: 400px;"></iframe>`;
+    }
+
+    const modal = $("resource-modal");
+    if (modal) modal.classList.remove("hidden-section");
 }
 
 function closeResourceModal() {
-    $("resource-modal").classList.add("hidden-section");
+    const modal = $("resource-modal");
+    if (modal) modal.classList.add("hidden-section");
 }
 
 function handleDownloadPDF() {
@@ -328,21 +427,24 @@ function toggleFaq(id) {
     const ans = $(`faq-ans-${id}`);
     const icon = $(`faq-icon-${id}`);
 
-    if (ans.classList.contains("hidden-section")) {
-        ans.classList.remove("hidden-section");
-        icon.style.transform = "rotate(180deg)";
-    } else {
-        ans.classList.add("hidden-section");
-        icon.style.transform = "rotate(0deg)";
+    if (ans) {
+        if (ans.classList.contains("hidden-section")) {
+            ans.classList.remove("hidden-section");
+            if (icon) icon.style.transform = "rotate(180deg)";
+        } else {
+            ans.classList.add("hidden-section");
+            if (icon) icon.style.transform = "rotate(0deg)";
+        }
     }
 }
 
 // --- CONTACT FORM HANDLER ---
 function handleContactSubmit(e) {
-    e.preventDefault();
-    const name = $("contact-name").value.trim();
+    if (e && e.preventDefault) e.preventDefault();
+    const nameElem = $("contact-name");
+    const name = nameElem ? nameElem.value.trim() : "Student";
     showToast(`Thank you ${name}! Your inquiry has been sent to administration.`, "success");
-    e.target.reset();
+    if (e.target && typeof e.target.reset === "function") e.target.reset();
 }
 
 function renderAuditLogs() {
@@ -360,8 +462,10 @@ function renderAuditLogs() {
 
 function showToast(msg, type = "info") {
     const container = $("toast-container");
+    if (!container) return;
+    
     const toast = document.createElement("div");
-    toast.className = `toast glass border-l-4 ${type === 'error' ? 'border-red-400' : 'border-mint'} px-4 py-3 rounded-xl text-sm font-semibold shadow-xl`;
+    toast.className = `toast glass border-l-4 ${type === 'error' ? 'border-red-400' : 'border-mint'} px-4 py-3 rounded-xl text-sm font-semibold shadow-xl my-2`;
     toast.innerText = msg;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
