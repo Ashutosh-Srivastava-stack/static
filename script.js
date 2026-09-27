@@ -4,41 +4,43 @@
 
 const MASTER_KEY = "NOTES2026";
 
-const GITHUB_USERNAME = "Ashutosh-Srivastava-stack";
-const GITHUB_REPO = "eduvault-pdf-storage";
-const GITHUB_PAT = "YOUR_FINE_GRAINED_TOKEN_HERE"; // Fine-grained Personal Access Token
-
 async function uploadPdfToGitHub(file) {
-    // 1. Convert file to base64
-    const reader = new FileReader();
-    const base64Promise = new Promise((resolve) => {
-        reader.onload = () => resolve(reader.result.split(',')[1]);
+    const base64Content = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = reader.result;
+            const base64 = result.includes(',') ? result.split(',')[1] : result;
+            resolve(base64);
+        };
+        reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
     });
-    const base64Content = await base64Promise;
 
-    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-
-    // 2. Call your secure Vercel Serverless Function
+    // Call your Vercel serverless function endpoint
     const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            fileName,
-            base64Content
+            fileName: file.name,
+            base64Content: base64Content
         })
     });
 
-    const data = await response.json();
-
+    const contentType = response.headers.get("content-type");
     if (!response.ok) {
-        throw new Error(data.error || "Failed to upload PDF via serverless function.");
+        if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "GitHub upload failed.");
+        } else {
+            const errorText = await response.text();
+            throw new Error(`Upload server error: ${response.status}`);
+        }
     }
 
-    // 3. Return the public Raw URL
-    return data.pdfUrl;
+    const data = await response.json();
+    return data.url;
 }
 
 let currentUser = JSON.parse(localStorage.getItem("eduvault_user")) || null;
