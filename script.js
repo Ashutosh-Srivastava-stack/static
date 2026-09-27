@@ -411,18 +411,48 @@ function renderNotes() {
     }
 
     grid.innerHTML = filtered.map(n => `
-        <div onclick="openResourceModal('${n.id}')" class="glass rounded-2xl p-6 note-card border border-white/5 flex flex-col justify-between cursor-pointer">
+        <div class="glass rounded-2xl p-6 note-card border border-white/5 flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center mb-3">
                     <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-violet/20 text-purple border border-violet/30">${n.category}</span>
-                    <span class="text-xs text-textmuted">${n.date}</span>
+                    
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-textmuted">${n.date}</span>
+                        <!-- DELETE ACTION BUTTON -->
+                        <button onclick="event.stopPropagation(); deleteNoteCard('${n.id}')" title="Delete Card" class="text-textmuted hover:text-red-400 transition p-1">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 <h4 class="font-bold text-lg mb-2 text-white">${n.title}</h4>
                 <p class="text-textmuted text-sm mb-4">${n.desc}</p>
             </div>
-            <button class="w-full py-2.5 rounded-xl bg-violet/20 hover:bg-violet text-purple hover:text-white font-bold text-xs transition">View Note</button>
+            
+            <button onclick="openResourceModal('${n.id}')" class="w-full py-2.5 rounded-xl bg-violet/20 hover:bg-violet text-purple hover:text-white font-bold text-xs transition">View Note</button>
         </div>
     `).join("");
+}
+// --- DELETE A SUBJECT CARD ---
+function deleteNoteCard(noteId) {
+    if (!currentUser) {
+        showToast("Please sign in to perform this action.", "error");
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete this subject card?")) {
+        return;
+    }
+
+    // Filter out the card with the matching ID
+    notesData = notesData.filter(n => String(n.id) !== String(noteId));
+    
+    // Save updated list to localStorage
+    localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
+    
+    showToast("Subject card removed successfully.", "success");
+    
+    // Re-render UI cards
+    renderNotes();
 }
 
 // --- OPEN RESOURCE MODAL WITH ALL DEDICATED DOWNLOAD BUTTONS ---
