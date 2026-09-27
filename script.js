@@ -292,13 +292,12 @@ function toggleUserBlock(userId) {
     }
 }
 
-// --- PUBLISH NOTE WITH GITHUB UPLOAD ---
-// --- PUBLISH NOTE WITH MULTIPLE PDF LINKS SUPPORT ---
+// --- PUBLISH OR APPEND NOTE TO EXISTING SUBJECT BOX ---
 async function handlePublishNote(e) {
     if (e && e.preventDefault) e.preventDefault();
     
     const title = $("pub-title") ? $("pub-title").value.trim() : "";
-    const category = $("pub-category") ? $("pub-category").value : "GEN";
+    const category = $("pub-category") ? $("pub-category").value : "GEN"; // e.g., "SE", "PY", "ITW"
     const desc = $("pub-desc") ? $("pub-desc").value.trim() : "";
     const fileInput = $("pub-file");
     const rawUrlInput = $("pub-url") ? $("pub-url").value.trim() : "";
@@ -309,18 +308,18 @@ async function handlePublishNote(e) {
     try {
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = "Publishing...";
+            submitBtn.innerText = "Uploading...";
         }
 
         let collectedUrls = [];
 
-        // 1. If multiple raw URLs are entered in textarea/input (comma or newline separated)
+        // 1. Parse manual input URLs
         if (rawUrlInput) {
             const parsedUrls = rawUrlInput.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
             collectedUrls.push(...parsedUrls);
         }
 
-        // 2. If a file is uploaded to GitHub/Vercel
+        // 2. Upload PDF to GitHub/Server if selected
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
             if (file.type !== "application/pdf") {
@@ -335,20 +334,46 @@ async function handlePublishNote(e) {
             throw new Error("Please upload a PDF file or enter at least one PDF link.");
         }
 
-        const newNote = {
-            id: String(Date.now()),
-            title: title || "Untitled Note",
-            category,
-            desc,
-            author: currentUser ? currentUser.id : "Faculty",
-            date: new Date().toISOString().split('T')[0],
-            pdf_urls: collectedUrls // Store all links as an array
-        };
+        // 3. CHECK IF A CARD WITH THIS CATEGORY ALREADY EXISTS
+        let existingNoteIndex = notesData.findIndex(n => n.category.toUpperCase() === category.toUpperCase());
 
-        notesData.unshift(newNote);
+        if (existingNoteIndex !== -1) {
+            // APPEND LINK TO EXISTING SUBJECT CARD
+            let existingNote = notesData[existingNoteIndex];
+
+            // Normalize existing URLs to an array
+            if (!Array.isArray(existingNote.pdf_urls)) {
+                existingNote.pdf_urls = existingNote.pdf_url ? [existingNote.pdf_url] : [];
+            }
+
+            // Push new links into the existing card
+            existingNote.pdf_urls.push(...collectedUrls);
+
+            // Update description or date if provided
+            if (desc) existingNote.desc = desc;
+            existingNote.date = new Date().toISOString().split('T')[0];
+
+            showToast(`Added ${collectedUrls.length} new PDF link(s) to ${existingNote.title}!`, "success");
+
+        } else {
+            // CREATE A NEW SUBJECT CARD ONLY IF CATEGORY DOES NOT EXIST
+            const newNote = {
+                id: String(Date.now()),
+                title: title || `${category} Module Notes`,
+                category: category,
+                desc: desc || "Uploaded resource documents.",
+                author: currentUser ? currentUser.id : "Faculty",
+                date: new Date().toISOString().split('T')[0],
+                pdf_urls: collectedUrls
+            };
+
+            notesData.unshift(newNote);
+            showToast("Created new subject card with uploaded PDF!", "success");
+        }
+
+        // 4. Save to LocalStorage and re-render UI
         localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
 
-        showToast("Note published with all PDF links!", "success");
         if (e.target && typeof e.target.reset === "function") e.target.reset();
         
         renderNotes();
