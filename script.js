@@ -84,7 +84,7 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         desc: "SDLC, Waterfall Model, and Software Design methods.",
         author: "Prof. Iqbal Sir",
         date: "2026-08-22",
-        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_url: "https://github.com/Ashutosh-Srivastava-stack/eduvault-pdf-storage/raw/refs/heads/main/start%20to%20sprial.zip"
     },
     {
         id: "5",
