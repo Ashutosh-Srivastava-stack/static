@@ -57,7 +57,9 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         desc: "Comprehensive guide to Red-Black Trees, Graph Traversal, and OOP principles.",
         author: "Prof. Kailash Sir",
         date: "2026-08-28",
-        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_urls: [
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+        ]
     },
     {
         id: "2",
@@ -66,7 +68,9 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         desc: "Detailed lecture notes covering OSI Model, Firewall, and JavaScript.",
         author: "Prof. Ankita Mam",
         date: "2026-08-30",
-        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_urls: [
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+        ]
     },
     {
         id: "3",
@@ -75,7 +79,9 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         desc: "Solutions and notes on Artificial Intelligence and Machine Learning.",
         author: "Prof. Vineet Sir",
         date: "2026-08-15",
-        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_urls: [
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+        ]
     },
     {
         id: "4",
@@ -84,7 +90,9 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         desc: "SDLC, Waterfall Model, and Software Design methods.",
         author: "Prof. Iqbal Sir",
         date: "2026-08-22",
-        pdf_url: "https://github.com/Ashutosh-Srivastava-stack/eduvault-pdf-storage/raw/refs/heads/main/start%20to%20sprial.zip"
+        pdf_urls: [
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+        ]
     },
     {
         id: "5",
@@ -93,7 +101,9 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         desc: "Detailed lecture notes covering Process Scheduling, Deadlocks, and Memory Management.",
         author: "Prof. Rekh Nath Sir",
         date: "2026-08-27",
-        pdf_url: "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
+        pdf_urls: [
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+        ]
     }
 ];
 
@@ -280,8 +290,8 @@ function toggleUserBlock(userId) {
     }
 }
 
-// --- PUBLISH NOTE ---
 // --- PUBLISH NOTE WITH GITHUB UPLOAD ---
+// --- PUBLISH NOTE WITH MULTIPLE PDF LINKS SUPPORT ---
 async function handlePublishNote(e) {
     if (e && e.preventDefault) e.preventDefault();
     
@@ -289,7 +299,7 @@ async function handlePublishNote(e) {
     const category = $("pub-category") ? $("pub-category").value : "GEN";
     const desc = $("pub-desc") ? $("pub-desc").value.trim() : "";
     const fileInput = $("pub-file");
-    let pdfUrl = $("pub-url") ? $("pub-url").value.trim() : "";
+    const rawUrlInput = $("pub-url") ? $("pub-url").value.trim() : "";
 
     const submitBtn = e.target ? e.target.querySelector('button[type="submit"]') : null;
     const originalBtnText = submitBtn ? submitBtn.innerText : "Publish";
@@ -297,23 +307,30 @@ async function handlePublishNote(e) {
     try {
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = "Uploading to GitHub...";
+            submitBtn.innerText = "Publishing...";
         }
 
-        // Upload PDF directly to GitHub Repository via API
+        let collectedUrls = [];
+
+        // 1. If multiple raw URLs are entered in textarea/input (comma or newline separated)
+        if (rawUrlInput) {
+            const parsedUrls = rawUrlInput.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+            collectedUrls.push(...parsedUrls);
+        }
+
+        // 2. If a file is uploaded to GitHub/Vercel
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
-
             if (file.type !== "application/pdf") {
                 throw new Error("Only PDF documents are allowed.");
             }
-
-            // Calls your GitHub upload function!
-            pdfUrl = await uploadPdfToGitHub(file);
+            
+            const uploadedUrl = await uploadPdfToGitHub(file);
+            collectedUrls.push(uploadedUrl);
         }
 
-        if (!pdfUrl) {
-            throw new Error("Please select a PDF file or enter an external PDF link.");
+        if (collectedUrls.length === 0) {
+            throw new Error("Please upload a PDF file or enter at least one PDF link.");
         }
 
         const newNote = {
@@ -323,13 +340,13 @@ async function handlePublishNote(e) {
             desc,
             author: currentUser ? currentUser.id : "Faculty",
             date: new Date().toISOString().split('T')[0],
-            pdf_url: pdfUrl
+            pdf_urls: collectedUrls // Store all links as an array
         };
 
         notesData.unshift(newNote);
         localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
 
-        showToast("Note published and PDF uploaded to GitHub!", "success");
+        showToast("Note published with all PDF links!", "success");
         if (e.target && typeof e.target.reset === "function") e.target.reset();
         
         renderNotes();
@@ -381,22 +398,76 @@ function renderNotes() {
     `).join("");
 }
 
+// --- OPEN RESOURCE MODAL WITH ALL DEDICATED DOWNLOAD BUTTONS ---
 function openResourceModal(noteId) {
     currentNote = notesData.find(n => String(n.id) === String(noteId));
     if (!currentNote) return;
 
     const modalBadge = $("modal-badge");
     const modalTitle = $("modal-title");
-    const modalImageContainer = $("modal-image-container");
+    const modalDesc = $("modal-desc");
+    const linksContainer = $("pdf-links-container");
 
     if (modalBadge) modalBadge.innerText = currentNote.category;
     if (modalTitle) modalTitle.innerText = currentNote.title;
-    if (modalImageContainer) {
-        modalImageContainer.innerHTML = `<iframe src="${currentNote.pdf_url}" class="w-full h-full rounded-xl border border-white/10" style="min-height: 400px;"></iframe>`;
+    if (modalDesc) modalDesc.innerText = currentNote.desc || "Select a document below to download directly.";
+
+    // Handle single string fallback (pdf_url) OR multi-link array (pdf_urls)
+    let urlsList = [];
+    if (Array.isArray(currentNote.pdf_urls)) {
+        urlsList = currentNote.pdf_urls;
+    } else if (currentNote.pdf_url) {
+        urlsList = [currentNote.pdf_url];
+    }
+
+    if (linksContainer) {
+        if (urlsList.length === 0) {
+            linksContainer.innerHTML = `<p class="text-textmuted text-sm py-4">No download links available for this module.</p>`;
+        } else {
+            // Map through ALL links and render a separate download card for each
+            linksContainer.innerHTML = urlsList.map((url, index) => {
+                const fileName = url.split('/').pop().split('?')[0] || `Document Part ${index + 1}`;
+                
+                return `
+                    <div class="glass p-4 rounded-2xl border border-white/10 flex items-center justify-between gap-4 hover:border-violet/40 transition">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-10 h-10 rounded-xl bg-violet/20 text-purple flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-file-pdf text-lg"></i>
+                            </div>
+                            <div class="truncate">
+                                <div class="text-sm font-bold text-white truncate">Part ${index + 1}: ${fileName}</div>
+                                <div class="text-[11px] text-textmuted truncate">${url}</div>
+                            </div>
+                        </div>
+                        <button onclick="downloadSinglePdf('${encodeURIComponent(url)}')" class="shrink-0 px-4 py-2.5 rounded-xl bg-mint/20 hover:bg-mint text-mint hover:text-ink font-bold text-xs transition flex items-center gap-2 border border-mint/30">
+                            <i class="fa-solid fa-download"></i> Download PDF
+                        </button>
+                    </div>
+                `;
+            }).join("");
+        }
     }
 
     const modal = $("resource-modal");
     if (modal) modal.classList.remove("hidden-section");
+}
+
+// --- SINGLE FILE DOWNLOAD HANDLER ---
+function downloadSinglePdf(encodedUrl) {
+    if (!currentUser) {
+        showToast("Please sign in to download materials.", "error");
+        return;
+    }
+
+    const userRecord = managedUsers.find(u => u.id === currentUser.id || u.email === currentUser.id);
+    if (userRecord && userRecord.is_blocked) {
+        showToast("Access Denied: Download permissions for your account are blocked.", "error");
+        return;
+    }
+
+    const url = decodeURIComponent(encodedUrl);
+    window.open(url, "_blank");
+    showToast("Opening document download link...", "success");
 }
 
 function closeResourceModal() {
