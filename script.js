@@ -2,8 +2,8 @@
    TECH TITANS LIBRARY - FIREBOOK CONTROLLER
    ========================================================================== */
 
-const MASTER_KEY = "NOTES2026";
-const ADMIN_KEY = "ADMIN2026";
+const STUDENT_MASTER_KEY = "NOTES2026";
+const ADMIN_MASTER_KEY = "ADMIN2026";
 
 async function uploadPdfToGitHub(file) {
     const base64Content = await new Promise((resolve, reject) => {
@@ -17,7 +17,6 @@ async function uploadPdfToGitHub(file) {
         reader.readAsDataURL(file);
     });
 
-    // Call your Vercel serverless function endpoint
     const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
@@ -61,7 +60,7 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         author: "Prof. Kailash Sir",
         date: "2026-08-28",
         pdf_urls: [
-            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
         ]
     },
     {
@@ -84,7 +83,7 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         author: "Prof. Vineet Sir",
         date: "2026-08-15",
         pdf_urls: [
-            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
         ]
     },
     {
@@ -107,7 +106,7 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         author: "Prof. Rekh Nath Sir",
         date: "2026-08-27",
         pdf_urls: [
-            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+            "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf"
         ]
     }
 ];
@@ -123,40 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkSession();
 });
 
-// --- REGISTRATION ---
-async function handleRegister() {
-    const nameElem = $("regName");
-    const keyElem = $("regKey");
-    const res = $("regResult");
-
-    const name = nameElem ? nameElem.value.trim() : "";
-    const key = keyElem ? keyElem.value.trim() : "";
-
-    if (!res) return;
-
-    if (key !== MASTER_KEY) {
-        res.className = "error text-red-400 font-semibold text-xs mt-2";
-        res.innerText = "Invalid Invitation Key!";
-        return;
-    }
-    if (!name) {
-        res.className = "error text-red-400 font-semibold text-xs mt-2";
-        res.innerText = "Please enter your name.";
-        return;
-    }
-
-    const generatedPassword = Math.random().toString(36).slice(-8);
-
-    try {
-        res.className = "success text-mint font-semibold text-xs mt-2";
-        res.innerHTML = `<p>Registration Successful! Your Passkey: <strong>${generatedPassword}</strong></p>`;
-    } catch (err) {
-        res.className = "error text-red-400 font-semibold text-xs mt-2";
-        res.innerText = "Error: " + err.message;
-    }
-}
-
-// --- LOGIN & AUTHENTICATION ---
+// --- LOGIN & AUTHENTICATION WITH DUAL MASTER KEYS ---
 function switchLoginTab(role) {
     const roleInput = $("login-role");
     const tabStudent = $("tab-student");
@@ -179,9 +145,8 @@ async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
 
     const role = $("login-role") ? $("login-role").value : "student";
-    const nameInput = $("loginName") || $("login-id");
+    const nameInput = $("loginName") \vert{}\vert{} $("login-id");
     const passInput = $("loginPass");
-    const res = $("loginResult");
 
     const name = nameInput ? nameInput.value.trim() : "";
     const pass = passInput ? passInput.value.trim() : "";
@@ -191,8 +156,20 @@ async function handleLogin(e) {
         return;
     }
 
+    // Role-specific Master Key Validation
+    if (role === "admin") {
+        if (pass !== ADMIN_MASTER_KEY) {
+            showToast("Invalid Admin Key! Please enter the correct admin password.", "error");
+            return;
+        }
+    } else {
+        if (pass !== STUDENT_MASTER_KEY) {
+            showToast("Invalid Student Key! Please enter the correct access code.", "error");
+            return;
+        }
+    }
+
     try {
-        // Check local block list fallback
         const existingRecord = managedUsers.find(u => u.email === name || u.id === name);
         if (existingRecord && existingRecord.is_blocked) {
             showToast("Your account has been blocked by an Administrator.", "error");
@@ -218,7 +195,6 @@ async function handleLogin(e) {
         checkSession();
 
     } catch (err) {
-        if (res) res.innerText = "Login error: " + err.message;
         showToast("Login error: " + err.message, "error");
     }
 }
@@ -241,7 +217,7 @@ function checkSession() {
         if (loginScreen) loginScreen.classList.add("hidden-section");
         if (dashboardScreen) dashboardScreen.classList.remove("hidden-section");
 
-        const nameElem = $("user-display-name") || $("userDisplayName");
+        const nameElem = $("user-display-name") \vert{}\vert{} $("userDisplayName");
         const roleElem = $("user-display-role");
         if (nameElem) nameElem.innerText = currentUser.id;
         if (roleElem) roleElem.innerText = `Role: ${currentUser.role === 'admin' ? 'Faculty Admin' : 'Student'}`;
@@ -257,8 +233,8 @@ function checkSession() {
         } else {
             if (studentView) studentView.classList.remove("hidden-section");
             if (adminView) adminView.classList.add("hidden-section");
-            renderNotes();
         }
+        renderNotes();
     }
 }
 
@@ -345,7 +321,6 @@ async function handlePublishNote(e) {
                 existingNote.pdf_urls = existingNote.pdf_url ? [existingNote.pdf_url] : [];
             }
 
-            // Append new links
             existingNote.pdf_urls.push(...collectedUrls);
             if (desc) existingNote.desc = desc;
             existingNote.date = new Date().toISOString().split('T')[0];
@@ -366,7 +341,6 @@ async function handlePublishNote(e) {
             showToast("Created new subject card with uploaded PDF!", "success");
         }
 
-        // Save updated notes to LocalStorage
         localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
 
         if (e.target && typeof e.target.reset === "function") e.target.reset();
@@ -383,7 +357,8 @@ async function handlePublishNote(e) {
         }
     }
 }
-// --- NOTES DISPLAY & DOWNLOAD ---
+
+// --- NOTES DISPLAY ---
 function renderNotes() {
     const grid = $("notes-grid");
     if (!grid) return;
@@ -405,6 +380,8 @@ function renderNotes() {
         return;
     }
 
+    const isAdmin = currentUser && currentUser.role === "admin";
+
     grid.innerHTML = filtered.map(n => `
         <div class="glass rounded-2xl p-6 note-card border border-white/5 flex flex-col justify-between">
             <div>
@@ -413,10 +390,12 @@ function renderNotes() {
                     
                     <div class="flex items-center gap-3">
                         <span class="text-xs text-textmuted">${n.date}</span>
-                        <!-- DELETE ACTION BUTTON -->
+                        ${isAdmin ? `
+                        <!-- DELETE CARD (ADMIN ONLY) -->
                         <button onclick="event.stopPropagation(); deleteNoteCard('${n.id}')" title="Delete Card" class="text-textmuted hover:text-red-400 transition p-1">
                             <i class="fa-solid fa-trash-can text-xs"></i>
                         </button>
+                        ` : ''}
                     </div>
                 </div>
                 <h4 class="font-bold text-lg mb-2 text-white">${n.title}</h4>
@@ -427,10 +406,11 @@ function renderNotes() {
         </div>
     `).join("");
 }
+
 // --- DELETE A SUBJECT CARD ---
-/*function deleteNoteCard(noteId) {
-    if (!currentUser) {
-        showToast("Please sign in to perform this action.", "error");
+function deleteNoteCard(noteId) {
+    if (!currentUser || currentUser.role !== "admin") {
+        showToast("Admin access required to delete cards.", "error");
         return;
     }
 
@@ -438,19 +418,14 @@ function renderNotes() {
         return;
     }
 
-    // Filter out the card with the matching ID
     notesData = notesData.filter(n => String(n.id) !== String(noteId));
-    
-    // Save updated list to localStorage
     localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
     
     showToast("Subject card removed successfully.", "success");
-    
-    // Re-render UI cards
     renderNotes();
-}*/
+}
 
-// --- OPEN RESOURCE MODAL WITH ALL DEDICATED DOWNLOAD BUTTONS ---
+// --- OPEN RESOURCE MODAL WITH DOWNLOAD LINKS ---
 function openResourceModal(noteId) {
     currentNote = notesData.find(n => String(n.id) === String(noteId));
     if (!currentNote) return;
@@ -464,7 +439,6 @@ function openResourceModal(noteId) {
     if (modalTitle) modalTitle.innerText = currentNote.title;
     if (modalDesc) modalDesc.innerText = currentNote.desc || "Select a document below to download directly.";
 
-    // Handle single string fallback (pdf_url) OR multi-link array (pdf_urls)
     let urlsList = [];
     if (Array.isArray(currentNote.pdf_urls)) {
         urlsList = currentNote.pdf_urls;
@@ -476,7 +450,6 @@ function openResourceModal(noteId) {
         if (urlsList.length === 0) {
             linksContainer.innerHTML = `<p class="text-textmuted text-sm py-4">No download links available for this module.</p>`;
         } else {
-            // Map through ALL links and render a separate download card for each
             linksContainer.innerHTML = urlsList.map((url, index) => {
                 const fileName = url.split('/').pop().split('?')[0] || `Document Part ${index + 1}`;
                 
@@ -527,25 +500,6 @@ function closeResourceModal() {
     if (modal) modal.classList.add("hidden-section");
 }
 
-function handleDownloadPDF() {
-    if (!currentUser) {
-        showToast("Please sign in to download materials.", "error");
-        return;
-    }
-
-    const userRecord = managedUsers.find(u => u.id === currentUser.id || u.email === currentUser.id);
-    if (userRecord && userRecord.is_blocked) {
-        showToast("Access Denied: Download permissions for your account are blocked.", "error");
-        return;
-    }
-
-    if (currentNote && currentNote.pdf_url) {
-        window.open(currentNote.pdf_url, "_blank");
-        showToast("Downloading notes...", "success");
-    }
-}
-
-// --- FAQ TOGGLE HANDLER ---
 function toggleFaq(id) {
     const ans = $(`faq-ans-${id}`);
     const icon = $(`faq-icon-${id}`);
@@ -561,7 +515,6 @@ function toggleFaq(id) {
     }
 }
 
-// --- CONTACT FORM HANDLER ---
 function handleContactSubmit(e) {
     if (e && e.preventDefault) e.preventDefault();
     const nameElem = $("contact-name");
