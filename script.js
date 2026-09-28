@@ -7,6 +7,27 @@ const ADMIN_MASTER_KEY = "ADMIN2026";
 
 function $(id) { return document.getElementById(id); }
 
+// --- MOBILE MENU TOGGLE ---
+function toggleMobileMenu() {
+    const menu = $("mobile-menu");
+    const icon = $("mobile-menu-icon");
+    if (!menu) return;
+
+    if (menu.classList.contains("hidden-section")) {
+        menu.classList.remove("hidden-section");
+        if (icon) {
+            icon.classList.remove("fa-bars");
+            icon.classList.add("fa-xmark");
+        }
+    } else {
+        menu.classList.add("hidden-section");
+        if (icon) {
+            icon.classList.remove("fa-xmark");
+            icon.classList.add("fa-bars");
+        }
+    }
+}
+
 // --- STATE MANAGEMENT ---
 let currentUser = JSON.parse(localStorage.getItem("eduvault_user")) || null;
 let currentNote = null;
@@ -99,29 +120,28 @@ function switchLoginTab(role) {
 
     if (tabStudent) {
         if (role === "student") {
-            tabStudent.className = "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer";
+            tabStudent.className = "flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-violet text-white font-bold text-xs sm:text-sm transition cursor-pointer";
         } else {
-            tabStudent.className = "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition hover:text-white cursor-pointer";
+            tabStudent.className = "flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-textmuted font-bold text-xs sm:text-sm transition hover:text-white cursor-pointer";
         }
     }
 
     if (tabAdmin) {
         if (role === "admin") {
-            tabAdmin.className = "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer";
+            tabAdmin.className = "flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-violet text-white font-bold text-xs sm:text-sm transition cursor-pointer";
         } else {
-            tabAdmin.className = "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition hover:text-white cursor-pointer";
+            tabAdmin.className = "flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-textmuted font-bold text-xs sm:text-sm transition hover:text-white cursor-pointer";
         }
     }
 }
 
-// --- LOGIN HANDLER (FIXED) ---
+// --- LOGIN HANDLER ---
 async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
 
     const roleInput = $("login-role");
     const role = roleInput ? roleInput.value : activeRoleTab;
 
-    // Handles both HTML element ID options safely
     const nameInput = $("loginName") || $("login-id");
     const passInput = $("loginPass") || $("loginpass");
 
@@ -138,7 +158,6 @@ async function handleLogin(e) {
         return;
     }
 
-    // Role-based password validation
     if (role === "admin") {
         if (pass !== ADMIN_MASTER_KEY) {
             showToast("Invalid Admin Password!", "error");
@@ -333,7 +352,7 @@ async function handlePublishNote(e) {
     }
 }
 
-// --- RENDER & DISPLAY NOTES (NO DELETE BUTTON) ---
+// --- RENDER & DISPLAY NOTES ---
 function renderNotes() {
     const grid = $("notes-grid");
     if (!grid) return;
@@ -351,19 +370,19 @@ function renderNotes() {
     });
 
     if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center text-textmuted py-8">No matching notes found.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center text-textmuted py-8 text-sm">No matching notes found.</div>`;
         return;
     }
 
     grid.innerHTML = filtered.map(n => `
-        <div class="glass rounded-2xl p-6 note-card border border-white/5 flex flex-col justify-between">
+        <div class="glass rounded-2xl p-5 sm:p-6 note-card border border-white/5 flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center mb-3">
-                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-violet/20 text-purple border border-violet/30">${n.category}</span>
-                    <span class="text-xs text-textmuted">${n.date}</span>
+                    <span class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] font-bold uppercase bg-violet/20 text-purple border border-violet/30">${n.category}</span>
+                    <span class="text-[11px] sm:text-xs text-textmuted">${n.date}</span>
                 </div>
-                <h4 class="font-bold text-lg mb-2 text-white">${n.title}</h4>
-                <p class="text-textmuted text-sm mb-4">${n.desc}</p>
+                <h4 class="font-bold text-base sm:text-lg mb-2 text-white leading-snug">${n.title}</h4>
+                <p class="text-textmuted text-xs sm:text-sm mb-4 line-clamp-3">${n.desc}</p>
             </div>
             <button onclick="openResourceModal('${n.id}')" class="w-full py-2.5 rounded-xl bg-violet/20 hover:bg-violet text-purple hover:text-white font-bold text-xs transition">View Note</button>
         </div>
@@ -388,22 +407,22 @@ function openResourceModal(noteId) {
 
     if (linksContainer) {
         if (urlsList.length === 0) {
-            linksContainer.innerHTML = `<p class="text-textmuted text-sm py-4">No download links available for this module.</p>`;
+            linksContainer.innerHTML = `<p class="text-textmuted text-xs sm:text-sm py-4">No download links available for this module.</p>`;
         } else {
             linksContainer.innerHTML = urlsList.map((url, index) => {
                 const fileName = url.split('/').pop().split('?')[0] || `Document Part ${index + 1}`;
                 return `
-                    <div class="glass p-4 rounded-2xl border border-white/10 flex items-center justify-between gap-4 hover:border-violet/40 transition">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="w-10 h-10 rounded-xl bg-violet/20 text-purple flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-file-pdf text-lg"></i>
+                    <div class="glass p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-violet/40 transition">
+                        <div class="flex items-center gap-3 overflow-hidden w-full sm:w-auto">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet/20 text-purple flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-file-pdf text-base sm:text-lg"></i>
                             </div>
                             <div class="truncate">
-                                <div class="text-sm font-bold text-white truncate">Part ${index + 1}: ${fileName}</div>
-                                <div class="text-[11px] text-textmuted truncate">${url}</div>
+                                <div class="text-xs sm:text-sm font-bold text-white truncate">Part ${index + 1}: ${fileName}</div>
+                                <div class="text-[10px] sm:text-[11px] text-textmuted truncate">${url}</div>
                             </div>
                         </div>
-                        <button onclick="downloadSinglePdf('${encodeURIComponent(url)}')" class="shrink-0 px-4 py-2.5 rounded-xl bg-mint/20 hover:bg-mint text-mint hover:text-ink font-bold text-xs transition flex items-center gap-2 border border-mint/30">
+                        <button onclick="downloadSinglePdf('${encodeURIComponent(url)}')" class="w-full sm:w-auto shrink-0 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-mint/20 hover:bg-mint text-mint hover:text-ink font-bold text-xs transition flex items-center justify-center gap-2 border border-mint/30">
                             <i class="fa-solid fa-download"></i> Download PDF
                         </button>
                     </div>
@@ -442,16 +461,16 @@ function renderUserManagement() {
 
     table.innerHTML = managedUsers.map(user => `
         <tr class="hover:bg-white/5 transition">
-            <td class="py-3 font-semibold text-white">${user.id}</td>
-            <td class="py-3 text-textmuted text-xs uppercase">${user.role}</td>
-            <td class="py-3">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${user.is_blocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-mint/10 text-mint border border-mint/20'}">
+            <td class="py-2.5 px-2 font-semibold text-white truncate max-w-[100px] sm:max-w-none">${user.id}</td>
+            <td class="py-2.5 px-2 text-textmuted text-[10px] sm:text-xs uppercase">${user.role}</td>
+            <td class="py-2.5 px-2">
+                <span class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold ${user.is_blocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-mint/10 text-mint border border-mint/20'}">
                     ${user.is_blocked ? 'Blocked' : 'Active'}
                 </span>
             </td>
-            <td class="py-3 text-right">
-                <button onclick="toggleUserBlock('${user.id}')" class="px-3 py-1 rounded-lg text-xs font-bold transition ${user.is_blocked ? 'bg-mint/20 text-mint hover:bg-mint hover:text-ink' : 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white'}">
-                    ${user.is_blocked ? 'Unblock' : 'Block User'}
+            <td class="py-2.5 px-2 text-right">
+                <button onclick="toggleUserBlock('${user.id}')" class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-bold transition ${user.is_blocked ? 'bg-mint/20 text-mint hover:bg-mint hover:text-ink' : 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white'}">
+                    ${user.is_blocked ? 'Unblock' : 'Block'}
                 </button>
             </td>
         </tr>
@@ -474,9 +493,9 @@ function renderAuditLogs() {
 
     table.innerHTML = auditLogs.map(log => `
         <tr class="hover:bg-white/5 transition">
-            <td class="py-2.5 text-textmuted text-xs">${log.time}</td>
-            <td class="py-2.5 font-semibold text-white">${log.user}</td>
-            <td class="py-2.5 text-textmuted">${log.action}</td>
+            <td class="py-2.5 px-2 text-textmuted text-[10px] sm:text-xs whitespace-nowrap">${log.time}</td>
+            <td class="py-2.5 px-2 font-semibold text-white text-xs whitespace-nowrap">${log.user}</td>
+            <td class="py-2.5 px-2 text-textmuted text-xs truncate max-w-[120px] sm:max-w-none">${log.action}</td>
         </tr>
     `).join("");
 }
@@ -509,7 +528,7 @@ function showToast(msg, type = "info") {
     if (!container) return;
     
     const toast = document.createElement("div");
-    toast.className = `toast glass border-l-4 ${type === 'error' ? 'border-red-400' : 'border-mint'} px-4 py-3 rounded-xl text-sm font-semibold shadow-xl my-2`;
+    toast.className = `toast glass border-l-4 ${type === 'error' ? 'border-red-400' : 'border-mint'} px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold shadow-xl my-1`;
     toast.innerText = msg;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
