@@ -122,15 +122,18 @@ document.addEventListener("DOMContentLoaded", () => {
     checkSession();
 });
 
-// --- LOGIN & AUTHENTICATION WITH DUAL MASTER KEYS ---
-
+// --- ROLE TAB SWITCHING ---
 function switchLoginTab(role) {
     const roleInput = $("login-role");
     const tabStudent = $("tab-student");
     const tabAdmin = $("tab-admin");
 
-    if (roleInput) roleInput.value = role;
+    // 1. Force the hidden input value to the selected role
+    if (roleInput) {
+        roleInput.value = role;
+    }
 
+    // 2. Update Student Tab Styles
     if (tabStudent) {
         if (role === "student") {
             tabStudent.className = "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer";
@@ -139,6 +142,7 @@ function switchLoginTab(role) {
         }
     }
 
+    // 3. Update Admin Tab Styles
     if (tabAdmin) {
         if (role === "admin") {
             tabAdmin.className = "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer";
@@ -148,26 +152,13 @@ function switchLoginTab(role) {
     }
 }
 
-// --- DOM INITIALIZATION & EVENT LISTENERS ---
-document.addEventListener("DOMContentLoaded", () => {
-    checkSession();
-
-    // Bind login tab click events dynamically
-    const tabStudent = $("tab-student");
-    const tabAdmin = $("tab-admin");
-
-    if (tabStudent) {
-        tabStudent.addEventListener("click", () => switchLoginTab("student"));
-    }
-    if (tabAdmin) {
-        tabAdmin.addEventListener("click", () => switchLoginTab("admin"));
-    }
-});
-
+// --- LOGIN HANDLER ---
 async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
 
-    const role = $("login-role") ? $("login-role").value : "student";
+    const roleInput = $("login-role");
+    const role = roleInput ? roleInput.value : "student";
+    
     const nameInput = $("loginName") \vert{}\vert{} $("login-id");
     const passInput = $("loginPass");
 
@@ -179,15 +170,15 @@ async function handleLogin(e) {
         return;
     }
 
-    // Role-specific Master Key Validation
+    // Validate Master Keys strictly by selected Role
     if (role === "admin") {
         if (pass !== ADMIN_MASTER_KEY) {
-            showToast("Invalid Admin Key! Please enter the correct admin password.", "error");
+            showToast("Invalid Admin Password! Key must be ADMIN2026.", "error");
             return;
         }
     } else {
         if (pass !== STUDENT_MASTER_KEY) {
-            showToast("Invalid Student Key! Please enter the correct access code.", "error");
+            showToast("Invalid Student Key! Key must be NOTES2026.", "error");
             return;
         }
     }
@@ -221,6 +212,21 @@ async function handleLogin(e) {
         showToast("Login error: " + err.message, "error");
     }
 }
+
+// --- INITIALIZE CLICK EVENT LISTENERS SAFELY ---
+document.addEventListener("DOMContentLoaded", () => {
+    checkSession();
+
+    const tabStudent = $("tab-student");
+    const tabAdmin = $("tab-admin");
+
+    if (tabStudent) {
+        tabStudent.addEventListener("click", () => switchLoginTab("student"));
+    }
+    if (tabAdmin) {
+        tabAdmin.addEventListener("click", () => switchLoginTab("admin"));
+    }
+});
 
 function handleLogout() {
     currentUser = null;
