@@ -58,19 +58,27 @@
             background: radial-gradient(circle at 10% 10%, rgba(124,92,252,.13), transparent 30%), radial-gradient(circle at 90% 20%, rgba(56,217,255,.08), transparent 25%), var(--ink);
             color: var(--text);
             font-family: "Inter", sans-serif;
+            overflow-x: hidden;
         }
         ::selection { background: var(--violet); color: white; }
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--ink); }
         ::-webkit-scrollbar-thumb { background: linear-gradient(var(--violet), var(--cyan)); border-radius: 10px; }
         .glass { background: rgba(21, 30, 53, .72); border: 1px solid rgba(155,123,255,.16); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
         .gradient-text { background: linear-gradient(90deg, #ffffff, #9B7BFF, #38D9FF); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .hero-grid { background-image: linear-gradient(rgba(124,92,252,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,252,.05) 1px, transparent 1px); background-size: 45px 45px; }
+        .hero-grid { background-image: linear-gradient(rgba(124,92,252,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,252,.05) 1px, transparent 1px); background-size: 30px 30px; }
+        @media (min-width: 768px) {
+            .hero-grid { background-size: 45px 45px; }
+        }
         .orb { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
-        .orb-one { width: 280px; height: 280px; background: rgba(124,92,252,.18); top: 80px; left: -80px; }
-        .orb-two { width: 260px; height: 260px; background: rgba(56,217,255,.12); right: -80px; top: 250px; }
+        .orb-one { width: 200px; height: 200px; background: rgba(124,92,252,.18); top: 40px; left: -50px; }
+        .orb-two { width: 200px; height: 200px; background: rgba(56,217,255,.12); right: -50px; top: 200px; }
+        @media (min-width: 768px) {
+            .orb-one { width: 280px; height: 280px; top: 80px; left: -80px; }
+            .orb-two { width: 260px; height: 260px; right: -80px; top: 250px; }
+        }
         .note-card { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
-        .note-card:hover { transform: translateY(-6px); border-color: rgba(155,123,255,.45); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+        .note-card:hover { transform: translateY(-4px); border-color: rgba(155,123,255,.45); box-shadow: 0 15px 45px rgba(0,0,0,.25); }
         .hidden-section { display: none !important; }
         .toast { animation: toastIn .3s ease forwards; }
         @keyframes toastIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -79,90 +87,107 @@
 </head>
 
 <body>
-<div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3 w-[calc(100%-40px)] sm:w-auto"></div>
+<div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-3 w-[calc(100%-40px)] sm:w-auto max-w-sm"></div>
 
 <!-- NAVIGATION -->
-<nav class="sticky top-0 z-50 bg-ink/80 backdrop-blur-xl border-b border-white/5">
+<nav class="sticky top-0 z-50 bg-ink/90 backdrop-blur-xl border-b border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="h-20 flex items-center justify-between">
-            <a href="#home" class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br from-violet to-purple shadow-glow">
-                    <i class="fa-solid fa-feather-pointed text-white"></i>
+        <div class="h-16 sm:h-20 flex items-center justify-between">
+            <a href="#home" class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center bg-gradient-to-br from-violet to-purple shadow-glow">
+                    <i class="fa-solid fa-feather-pointed text-white text-sm sm:text-base"></i>
                 </div>
                 <div>
-                    <div class="text-2xl font-boho font-bold">Tech Titans Library</div>
-                    <div class="text-[9px] tracking-[.25em] uppercase text-textmuted">Digital Academic Sanctuary</div>
+                    <div class="text-xl sm:text-2xl font-boho font-bold leading-none">Tech Titans Library</div>
+                    <div class="text-[8px] sm:text-[9px] tracking-[.2em] uppercase text-textmuted mt-0.5">Digital Academic Sanctuary</div>
                 </div>
             </a>
-            <div class="hidden md:flex items-center gap-7 text-sm">
+
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center gap-6 lg:gap-7 text-sm">
                 <a href="#home" class="text-textmuted hover:text-white transition">Home</a>
                 <a href="#portal" class="text-textmuted hover:text-white transition">Portal</a>
                 <a href="#sourcers" class="text-textmuted hover:text-white transition">Admins & Sourcers</a>
                 <a href="#faq" class="text-textmuted hover:text-white transition">FAQ</a>
                 <a href="#contact" class="text-textmuted hover:text-white transition">Contact</a>
-                <a href="#portal" class="px-5 py-2.5 rounded-xl bg-violet hover:bg-purple text-white font-bold transition shadow-glow">Portal Access</a>
+                <a href="#portal" class="px-4 py-2 rounded-xl bg-violet hover:bg-purple text-white font-bold transition shadow-glow text-xs sm:text-sm">Portal Access</a>
             </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-white text-xl p-2 focus:outline-none" aria-label="Toggle Menu">
+                <i id="mobile-menu-icon" class="fa-solid fa-bars"></i>
+            </button>
         </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden-section md:hidden bg-midnight/95 border-b border-white/10 px-6 py-4 flex flex-col gap-4 text-sm font-semibold">
+        <a href="#home" onclick="toggleMobileMenu()" class="text-textmuted hover:text-white py-1 transition">Home</a>
+        <a href="#portal" onclick="toggleMobileMenu()" class="text-textmuted hover:text-white py-1 transition">Portal</a>
+        <a href="#sourcers" onclick="toggleMobileMenu()" class="text-textmuted hover:text-white py-1 transition">Admins & Sourcers</a>
+        <a href="#faq" onclick="toggleMobileMenu()" class="text-textmuted hover:text-white py-1 transition">FAQ</a>
+        <a href="#contact" onclick="toggleMobileMenu()" class="text-textmuted hover:text-white py-1 transition">Contact</a>
+        <a href="#portal" onclick="toggleMobileMenu()" class="w-full text-center py-2.5 rounded-xl bg-violet text-white font-bold transition shadow-glow">Portal Access</a>
     </div>
 </nav>
 
 <main>
     <!-- HERO SECTION -->
-    <section id="home" class="relative min-h-[80vh] flex items-center overflow-hidden hero-grid">
+    <section id="home" class="relative min-h-[70vh] sm:min-h-[80vh] flex items-center overflow-hidden hero-grid">
         <div class="orb orb-one"></div>
         <div class="orb orb-two"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 text-center">
-            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight">Your Knowledge. <span class="block font-boho gradient-text text-6xl lg:text-8xl">Your Sanctuary.</span></h1>
-            <p class="max-w-2xl mx-auto mt-6 text-textmuted text-base sm:text-lg">Access verified lecture notes, download academic resources, and study seamlessly.</p>
-            <div class="flex justify-center gap-4 mt-8">
-                <a href="#portal" class="px-8 py-4 rounded-2xl bg-violet hover:bg-purple transition font-bold shadow-glow">Enter Portal</a>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 sm:py-20 text-center">
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight">Your Knowledge. <span class="block font-boho gradient-text text-5xl sm:text-7xl lg:text-8xl mt-1">Your Sanctuary.</span></h1>
+            <p class="max-w-2xl mx-auto mt-4 sm:mt-6 text-textmuted text-sm sm:text-lg">Access verified lecture notes, download academic resources, and study seamlessly.</p>
+            <div class="flex justify-center gap-4 mt-6 sm:mt-8">
+                <a href="#portal" class="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-2xl bg-violet hover:bg-purple transition font-bold shadow-glow text-center">Enter Portal</a>
             </div>
         </div>
     </section>
 
     <!-- PORTAL SECTION -->
-    <section id="portal" class="py-16 bg-midnight/40 border-y border-white/5">
+    <section id="portal" class="py-12 sm:py-16 bg-midnight/40 border-y border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl sm:text-4xl font-bold">Tech Titans Library Portal</h2>
+            <div class="text-center mb-8 sm:mb-12">
+                <h2 class="text-2xl sm:text-4xl font-bold">Tech Titans Library Portal</h2>
             </div>
 
             <!-- LOGIN SCREEN -->
-            <div id="login-screen" class="max-w-md mx-auto glass rounded-3xl p-7 sm:p-9 shadow-glow">
-                <div class="flex bg-ink rounded-2xl p-1.5 mb-7">
-                    <button type="button" id="tab-student" onclick="switchLoginTab('student')" class="flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition">Student</button>
-                    <button type="button" id="tab-admin" onclick="switchLoginTab('admin')" class="flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition">Admin / Faculty</button>
+            <div id="login-screen" class="max-w-md mx-auto glass rounded-2xl sm:rounded-3xl p-5 sm:p-9 shadow-glow">
+                <div class="flex bg-ink rounded-xl sm:rounded-2xl p-1 mb-6 sm:mb-7">
+                    <button type="button" id="tab-student" onclick="switchLoginTab('student')" class="flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-violet text-white font-bold text-xs sm:text-sm transition">Student</button>
+                    <button type="button" id="tab-admin" onclick="switchLoginTab('admin')" class="flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-textmuted font-bold text-xs sm:text-sm transition">Admin / Faculty</button>
                 </div>
 
-                <form onsubmit="handleLogin(event)" class="space-y-5">
+                <form onsubmit="handleLogin(event)" class="space-y-4 sm:space-y-5">
                     <input type="hidden" id="login-role" value="student">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">User ID / Name</label>
-                        <input type="text" id="loginName" required placeholder="Enter User ID or Email" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm">
+                        <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-textmuted mb-1.5 sm:mb-2">User ID / Name</label>
+                        <input type="text" id="loginName" required placeholder="Enter User ID or Email" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-white focus:outline-none focus:border-violet text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">Access Key / Password</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm">
+                        <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-textmuted mb-1.5 sm:mb-2">Access Key / Password</label>
+                        <input type="password" id="loginPass" required placeholder="NOTES2026 or ADMIN2026" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-white focus:outline-none focus:border-violet text-sm">
                     </div>
-                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-violet to-purple text-white font-bold shadow-glow hover:opacity-95 transition">Enter Portal</button>
+                    <button type="submit" class="w-full py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-violet to-purple text-white font-bold shadow-glow hover:opacity-95 transition text-sm">Enter Portal</button>
                 </form>
             </div>
 
             <!-- DASHBOARD CONTAINER -->
             <div id="dashboard-screen" class="hidden-section max-w-6xl mx-auto">
-                <div class="glass rounded-3xl p-6 mb-8 flex justify-between items-center">
+                <div class="glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                     <div>
-                        <h3 id="user-display-name" class="text-2xl font-bold">Welcome Back</h3>
-                        <p id="user-display-role" class="text-textmuted text-sm">Role: Student</p>
+                        <h3 id="user-display-name" class="text-xl sm:text-2xl font-bold">Welcome Back</h3>
+                        <p id="user-display-role" class="text-textmuted text-xs sm:text-sm">Role: Student</p>
                     </div>
-                    <button onclick="handleLogout()" class="px-5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-sm font-bold transition">Sign Out</button>
+                    <button onclick="handleLogout()" class="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs sm:text-sm font-bold transition text-center">Sign Out</button>
                 </div>
 
                 <!-- STUDENT DASHBOARD -->
-                <div id="student-view" class="space-y-8">
-                    <div class="glass rounded-2xl p-5 flex flex-col md:flex-row gap-4 justify-between items-center">
-                        <input type="text" id="notes-search" oninput="renderNotes()" placeholder="Search topics or codes..." class="w-full md:w-96 bg-ink/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet">
-                        <select id="notes-filter" onchange="renderNotes()" class="w-full md:w-auto bg-ink/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet">
+                <div id="student-view" class="space-y-6 sm:space-y-8">
+                    <div class="glass rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center">
+                        <input type="text" id="notes-search" oninput="renderNotes()" placeholder="Search topics or codes..." class="w-full sm:w-80 md:w-96 bg-ink/80 border border-white/10 rounded-xl px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-violet">
+                        <select id="notes-filter" onchange="renderNotes()" class="w-full sm:w-auto bg-ink/80 border border-white/10 rounded-xl px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-violet">
                             <option value="ALL">All Subjects</option>
                             <option value="PY">Python</option>
                             <option value="ITW">IT & Web Development</option>
@@ -171,24 +196,24 @@
                             <option value="OS">Operating Systems</option>
                         </select>
                     </div>
-                    <div id="notes-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    <div id="notes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
                 </div>
 
                 <!-- ADMIN DASHBOARD -->
-                <div id="admin-view" class="hidden-section space-y-8">
-                    <div class="grid lg:grid-cols-3 gap-8">
+                <div id="admin-view" class="hidden-section space-y-6 sm:space-y-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                         
                         <!-- Note & File Upload Form -->
-                        <div class="glass rounded-3xl p-7 lg:col-span-1 h-fit">
-                            <h4 class="text-xl font-bold mb-4 text-purple"><i class="fa-solid fa-file-circle-plus mr-2"></i>Publish Subject Notes</h4>
-                            <form onsubmit="handlePublishNote(event)" class="space-y-4">
+                        <div class="glass rounded-2xl sm:rounded-3xl p-5 sm:p-7 lg:col-span-1 h-fit">
+                            <h4 class="text-lg sm:text-xl font-bold mb-4 text-purple"><i class="fa-solid fa-file-circle-plus mr-2"></i>Publish Subject Notes</h4>
+                            <form onsubmit="handlePublishNote(event)" class="space-y-3.5 sm:space-y-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-textmuted mb-1">Title</label>
-                                    <input type="text" id="pub-title" required placeholder="e.g. Dynamic Programming" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none">
+                                    <label class="block text-[11px] sm:text-xs font-bold text-textmuted mb-1">Title</label>
+                                    <input type="text" id="pub-title" required placeholder="e.g. Dynamic Programming" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-violet focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-textmuted mb-1">Subject</label>
-                                    <select id="pub-category" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none">
+                                    <label class="block text-[11px] sm:text-xs font-bold text-textmuted mb-1">Subject</label>
+                                    <select id="pub-category" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-violet focus:outline-none">
                                         <option value="PY">Python</option>
                                         <option value="ITW">IT & Web Development</option>
                                         <option value="ET">Emerging Tech</option>
@@ -197,50 +222,54 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-textmuted mb-1">Description</label>
-                                    <textarea id="pub-desc" rows="3" required placeholder="Notes description..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none"></textarea>
+                                    <label class="block text-[11px] sm:text-xs font-bold text-textmuted mb-1">Description</label>
+                                    <textarea id="pub-desc" rows="3" required placeholder="Notes description..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-violet focus:outline-none"></textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-textmuted mb-1">Upload PDF File</label>
+                                    <label class="block text-[11px] sm:text-xs font-bold text-textmuted mb-1">Upload PDF File</label>
                                     <input type="file" id="pub-file" accept="application/pdf" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-textmuted focus:border-violet focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-textmuted mb-1">Or External PDF Link</label>
-                                    <input type="url" id="pub-url" placeholder="https://..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-violet focus:outline-none">
+                                    <label class="block text-[11px] sm:text-xs font-bold text-textmuted mb-1">Or External PDF Link</label>
+                                    <input type="url" id="pub-url" placeholder="https://..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:border-violet focus:outline-none">
                                 </div>
-                                <button type="submit" class="w-full py-3 rounded-xl bg-violet hover:bg-purple font-bold text-white shadow-glow transition text-sm">Publish Notes</button>
+                                <button type="submit" class="w-full py-3 rounded-xl bg-violet hover:bg-purple font-bold text-white shadow-glow transition text-xs sm:text-sm">Publish Notes</button>
                             </form>
                         </div>
 
                         <!-- User Management Panel -->
-                        <div class="glass rounded-3xl p-7 lg:col-span-2">
-                            <h4 class="text-xl font-bold mb-4 text-cyan"><i class="fa-solid fa-users-gear mr-2"></i>User Access Control & Management</h4>
-                            <div class="overflow-x-auto mb-8">
-                                <table class="w-full text-left text-sm">
-                                    <thead>
-                                        <tr class="border-b border-white/10 text-textmuted text-xs uppercase">
-                                            <th class="pb-3">User ID</th>
-                                            <th class="pb-3">Role</th>
-                                            <th class="pb-3">Status</th>
-                                            <th class="pb-3 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="user-management-table" class="divide-y divide-white/5"></tbody>
-                                </table>
+                        <div class="glass rounded-2xl sm:rounded-3xl p-5 sm:p-7 lg:col-span-2 space-y-6">
+                            <div>
+                                <h4 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-cyan"><i class="fa-solid fa-users-gear mr-2"></i>User Access Control</h4>
+                                <div class="overflow-x-auto -mx-2 sm:mx-0">
+                                    <table class="w-full text-left text-xs sm:text-sm min-w-[320px]">
+                                        <thead>
+                                            <tr class="border-b border-white/10 text-textmuted text-[10px] sm:text-xs uppercase">
+                                                <th class="pb-2.5 px-2">User ID</th>
+                                                <th class="pb-2.5 px-2">Role</th>
+                                                <th class="pb-2.5 px-2">Status</th>
+                                                <th class="pb-2.5 px-2 text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="user-management-table" class="divide-y divide-white/5"></tbody>
+                                    </table>
+                                </div>
                             </div>
 
-                            <h4 class="text-xl font-bold mb-4 text-mint"><i class="fa-solid fa-list-check mr-2"></i>Audit Logs</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead>
-                                        <tr class="border-b border-white/10 text-textmuted text-xs uppercase">
-                                            <th class="pb-3">Time</th>
-                                            <th class="pb-3">User</th>
-                                            <th class="pb-3">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="audit-log-table" class="divide-y divide-white/5"></tbody>
-                                </table>
+                            <div>
+                                <h4 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-mint"><i class="fa-solid fa-list-check mr-2"></i>Audit Logs</h4>
+                                <div class="overflow-x-auto -mx-2 sm:mx-0">
+                                    <table class="w-full text-left text-xs sm:text-sm min-w-[320px]">
+                                        <thead>
+                                            <tr class="border-b border-white/10 text-textmuted text-[10px] sm:text-xs uppercase">
+                                                <th class="pb-2.5 px-2">Time</th>
+                                                <th class="pb-2.5 px-2">User</th>
+                                                <th class="pb-2.5 px-2">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="audit-log-table" class="divide-y divide-white/5"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -251,76 +280,76 @@
     </section>
 
     <!-- ADMIN / SOURCERS SECTION -->
-    <section id="sourcers" class="py-20 border-b border-white/5">
+    <section id="sourcers" class="py-12 sm:py-20 border-b border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <span class="text-xs font-bold uppercase tracking-widest text-cyan">Core Team</span>
-                <h2 class="text-3xl sm:text-4xl font-bold mt-2">Admin / Sourcers</h2>
-                <p class="text-textmuted text-sm mt-3">The dedicated team curating, maintaining, and sourcing verified academic materials.</p>
+            <div class="text-center mb-10 sm:mb-14">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-cyan">Core Team</span>
+                <h2 class="text-2xl sm:text-4xl font-bold mt-1.5 sm:mt-2">Admin / Sourcers</h2>
+                <p class="text-textmuted text-xs sm:text-sm mt-2 sm:mt-3">The dedicated team curating, maintaining, and sourcing verified academic materials.</p>
             </div>
 
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass rounded-3xl p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
-                    <div class="w-16 h-16 mx-auto rounded-2xl bg-violet/20 text-purple flex items-center justify-center text-2xl font-bold mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="glass rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-xl sm:rounded-2xl bg-violet/20 text-purple flex items-center justify-center text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
                         <i class="fa-solid fa-user-shield"></i>
                     </div>
-                    <h3 class="font-bold text-lg text-white">Ashutosh Srivastava</h3>
-                    <p class="text-xs text-textmuted mt-1 uppercase tracking-wider">Lead Admin & Sourcer</p>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Ashutosh Srivastava</h3>
+                    <p class="text-[10px] sm:text-xs text-textmuted mt-1 uppercase tracking-wider">Lead Admin & Sourcer</p>
                 </div>
 
-                <div class="glass rounded-3xl p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
-                    <div class="w-16 h-16 mx-auto rounded-2xl bg-cyan/20 text-cyan flex items-center justify-center text-2xl font-bold mb-4">
+                <div class="glass rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-xl sm:rounded-2xl bg-cyan/20 text-cyan flex items-center justify-center text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
                         <i class="fa-solid fa-user-gear"></i>
                     </div>
-                    <h3 class="font-bold text-lg text-white">Ayush Singh</h3>
-                    <p class="text-xs text-textmuted mt-1 uppercase tracking-wider">Admin & Content Sourcer</p>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Ayush Singh</h3>
+                    <p class="text-[10px] sm:text-xs text-textmuted mt-1 uppercase tracking-wider">Admin & Content Sourcer</p>
                 </div>
 
-                <div class="glass rounded-3xl p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
-                    <div class="w-16 h-16 mx-auto rounded-2xl bg-mint/20 text-mint flex items-center justify-center text-2xl font-bold mb-4">
+                <div class="glass rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-xl sm:rounded-2xl bg-mint/20 text-mint flex items-center justify-center text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
                         <i class="fa-solid fa-folder-open"></i>
                     </div>
-                    <h3 class="font-bold text-lg text-white">Aryan Patel</h3>
-                    <p class="text-xs text-textmuted mt-1 uppercase tracking-wider">Academic Sourcer</p>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Aryan Patel</h3>
+                    <p class="text-[10px] sm:text-xs text-textmuted mt-1 uppercase tracking-wider">Academic Sourcer</p>
                 </div>
 
-                <div class="glass rounded-3xl p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
-                    <div class="w-16 h-16 mx-auto rounded-2xl bg-purple/20 text-purple flex items-center justify-center text-2xl font-bold mb-4">
+                <div class="glass rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-center border border-white/10 hover:border-violet/50 transition shadow-glow">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-xl sm:rounded-2xl bg-purple/20 text-purple flex items-center justify-center text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
                         <i class="fa-solid fa-database"></i>
                     </div>
-                    <h3 class="font-bold text-lg text-white">Arush Vishwakarma</h3>
-                    <p class="text-xs text-textmuted mt-1 uppercase tracking-wider">Resource Manager</p>
+                    <h3 class="font-bold text-base sm:text-lg text-white">Arush Vishwakarma</h3>
+                    <p class="text-[10px] sm:text-xs text-textmuted mt-1 uppercase tracking-wider">Resource Manager</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FAQ SECTION -->
-    <section id="faq" class="py-20 border-b border-white/5">
+    <section id="faq" class="py-12 sm:py-20 border-b border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <span class="text-xs font-bold uppercase tracking-widest text-purple">Got Questions?</span>
-                <h2 class="text-3xl sm:text-4xl font-bold mt-2">Frequently Asked Questions</h2>
-                <p class="text-textmuted text-sm mt-3">Find answers to common questions about access, PDF uploads, and system roles.</p>
+            <div class="text-center mb-10 sm:mb-14">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-purple">Got Questions?</span>
+                <h2 class="text-2xl sm:text-4xl font-bold mt-1.5 sm:mt-2">Frequently Asked Questions</h2>
+                <p class="text-textmuted text-xs sm:text-sm mt-2 sm:mt-3">Find answers to common questions about access, PDF uploads, and system roles.</p>
             </div>
 
-            <div class="space-y-4">
-                <div class="glass rounded-2xl overflow-hidden">
-                    <button onclick="toggleFaq(1)" class="w-full p-6 text-left flex justify-between items-center font-bold text-lg hover:text-purple transition">
-                        How do I access subject notes?
-                        <i id="faq-icon-1" class="fa-solid fa-chevron-down text-textmuted transition-transform"></i>
+            <div class="space-y-3 sm:space-y-4">
+                <div class="glass rounded-xl sm:rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(1)" class="w-full p-4 sm:p-6 text-left flex justify-between items-center font-bold text-sm sm:text-lg hover:text-purple transition gap-3">
+                        <span>How do I access subject notes?</span>
+                        <i id="faq-icon-1" class="fa-solid fa-chevron-down text-textmuted text-xs sm:text-base transition-transform shrink-0"></i>
                     </button>
-                    <div id="faq-ans-1" class="hidden-section px-6 pb-6 text-textmuted text-sm border-t border-white/5 pt-4">
+                    <div id="faq-ans-1" class="hidden-section px-4 pb-4 sm:px-6 sm:pb-6 text-textmuted text-xs sm:text-sm border-t border-white/5 pt-3 sm:pt-4">
                         Select the Student tab in the portal, sign in with your student credentials, and browse available subject modules. You can preview or download PDFs directly.
                     </div>
                 </div>
 
-                <div class="glass rounded-2xl overflow-hidden">
-                    <button onclick="toggleFaq(2)" class="w-full p-6 text-left flex justify-between items-center font-bold text-lg hover:text-purple transition">
-                        Who can upload new study materials?
-                        <i id="faq-icon-2" class="fa-solid fa-chevron-down text-textmuted transition-transform"></i>
+                <div class="glass rounded-xl sm:rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(2)" class="w-full p-4 sm:p-6 text-left flex justify-between items-center font-bold text-sm sm:text-lg hover:text-purple transition gap-3">
+                        <span>Who can upload new study materials?</span>
+                        <i id="faq-icon-2" class="fa-solid fa-chevron-down text-textmuted text-xs sm:text-base transition-transform shrink-0"></i>
                     </button>
-                    <div id="faq-ans-2" class="hidden-section px-6 pb-6 text-textmuted text-sm border-t border-white/5 pt-4">
+                    <div id="faq-ans-2" class="hidden-section px-4 pb-4 sm:px-6 sm:pb-6 text-textmuted text-xs sm:text-sm border-t border-white/5 pt-3 sm:pt-4">
                         Only verified Faculty and Administrators with Admin rights can publish new notes and upload PDF resources through the Admin Panel.
                     </div>
                 </div>
@@ -329,41 +358,41 @@
     </section>
 
     <!-- CONTACT SECTION -->
-    <section id="contact" class="py-20 bg-midnight/30">
+    <section id="contact" class="py-12 sm:py-20 bg-midnight/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <span class="text-xs font-bold uppercase tracking-widest text-cyan">Reach Out</span>
-                <h2 class="text-3xl sm:text-4xl font-bold mt-2">Contact Library Administration</h2>
+            <div class="text-center mb-10 sm:mb-14">
+                <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-cyan">Reach Out</span>
+                <h2 class="text-2xl sm:text-4xl font-bold mt-1.5 sm:mt-2">Contact Library Administration</h2>
             </div>
 
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="glass rounded-3xl p-8 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                <div class="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 space-y-6">
                     <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-cyan/20 text-cyan flex items-center justify-center shrink-0"><i class="fa-solid fa-envelope text-xl"></i></div>
-                        <div>
-                            <h4 class="font-bold text-white">Email Us</h4>
-                            <p class="text-textmuted text-sm mt-1">ashutoshcloud222@gmail.com</p>
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-cyan/20 text-cyan flex items-center justify-center shrink-0"><i class="fa-solid fa-envelope text-lg sm:text-xl"></i></div>
+                        <div class="overflow-hidden">
+                            <h4 class="font-bold text-white text-sm sm:text-base">Email Us</h4>
+                            <p class="text-textmuted text-xs sm:text-sm mt-0.5 truncate">ashutoshcloud222@gmail.com</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass rounded-3xl p-8 lg:col-span-2">
-                    <form onsubmit="handleContactSubmit(event)" class="space-y-5">
-                        <div class="grid sm:grid-cols-2 gap-5">
+                <div class="glass rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:col-span-2">
+                    <form onsubmit="handleContactSubmit(event)" class="space-y-4 sm:space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">Your Name</label>
-                                <input type="text" id="contact-name" required placeholder="Name" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm">
+                                <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-textmuted mb-1.5 sm:mb-2">Your Name</label>
+                                <input type="text" id="contact-name" required placeholder="Name" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-white focus:outline-none focus:border-violet text-xs sm:text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">Email Address</label>
-                                <input type="email" id="contact-email" required placeholder="user@university.edu" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm">
+                                <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-textmuted mb-1.5 sm:mb-2">Email Address</label>
+                                <input type="email" id="contact-email" required placeholder="user@university.edu" class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-white focus:outline-none focus:border-violet text-xs sm:text-sm">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">Message</label>
-                            <textarea id="contact-message" rows="4" required placeholder="Describe your inquiry..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm"></textarea>
+                            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-textmuted mb-1.5 sm:mb-2">Message</label>
+                            <textarea id="contact-message" rows="4" required placeholder="Describe your inquiry..." class="w-full bg-ink/70 border border-white/10 rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-white focus:outline-none focus:border-violet text-xs sm:text-sm"></textarea>
                         </div>
-                        <button type="submit" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-violet to-purple text-white font-bold shadow-glow hover:opacity-95 transition text-sm">Send Message</button>
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-violet to-purple text-white font-bold shadow-glow hover:opacity-95 transition text-xs sm:text-sm">Send Message</button>
                     </form>
                 </div>
             </div>
@@ -371,29 +400,29 @@
     </section>
 </main>
 
-<footer class="py-8 border-t border-white/5 text-center text-textmuted text-sm">
+<footer class="py-6 sm:py-8 border-t border-white/5 text-center text-textmuted text-xs sm:text-sm">
     <p>© 2026 Tech Titans Library. Digital Academic Sanctuary.</p>
 </footer>
 
 <!-- RESOURCE DOWNLOAD MODAL -->
-<div id="resource-modal" class="fixed inset-0 z-[120] bg-ink/90 backdrop-blur-xl hidden-section flex items-center justify-center p-4">
-    <div class="glass w-full max-w-2xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
-        <div class="p-6 border-b border-white/10 flex items-center justify-between bg-midnight">
-            <div class="flex items-center gap-3">
-                <span id="modal-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-violet/20 text-purple border border-violet/30">CS</span>
-                <h3 id="modal-title" class="text-xl font-bold text-white">Subject Title</h3>
+<div id="resource-modal" class="fixed inset-0 z-[120] bg-ink/90 backdrop-blur-xl hidden-section flex items-center justify-center p-3 sm:p-4">
+    <div class="glass w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-white/10 overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+        <div class="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between bg-midnight">
+            <div class="flex items-center gap-2.5 sm:gap-3 overflow-hidden">
+                <span id="modal-badge" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase bg-violet/20 text-purple border border-violet/30 shrink-0">CS</span>
+                <h3 id="modal-title" class="text-base sm:text-xl font-bold text-white truncate">Subject Title</h3>
             </div>
-            <button onclick="closeResourceModal()" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-textmuted hover:text-white transition">
-                <i class="fa-solid fa-xmark text-lg"></i>
+            <button onclick="closeResourceModal()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl glass flex items-center justify-center text-textmuted hover:text-white transition shrink-0 ml-2">
+                <i class="fa-solid fa-xmark text-base sm:text-lg"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto space-y-4">
-            <p id="modal-desc" class="text-textmuted text-sm mb-4"></p>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-purple">Available PDF Downloads</h4>
-            <div id="pdf-links-container" class="space-y-3"></div>
+        <div class="p-4 sm:p-6 overflow-y-auto space-y-4">
+            <p id="modal-desc" class="text-textmuted text-xs sm:text-sm mb-3 sm:mb-4"></p>
+            <h4 class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-purple">Available PDF Downloads</h4>
+            <div id="pdf-links-container" class="space-y-2.5 sm:space-y-3"></div>
         </div>
-        <div class="p-4 border-t border-white/10 bg-midnight/80 flex justify-end">
-            <button onclick="closeResourceModal()" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition">Close</button>
+        <div class="p-3 sm:p-4 border-t border-white/10 bg-midnight/80 flex justify-end">
+            <button onclick="closeResourceModal()" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition">Close</button>
         </div>
     </div>
 </div>
