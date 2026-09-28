@@ -3,6 +3,7 @@
    ========================================================================== */
 
 const MASTER_KEY = "NOTES2026";
+const ADMIN_KEY = "ADMIN2026";
 
 async function uploadPdfToGitHub(file) {
     const base64Content = await new Promise((resolve, reject) => {
@@ -72,6 +73,7 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         date: "2026-08-30",
         pdf_urls: [
             "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+            "https://github.com/Ashutosh-Srivastava-stack/eduvault-pdf-storage/blob/670898ca998964198e35908d3299c66ccedf6ff7/uploads/1790588893998_unit_1_ITWT-compressed.pdf"
         ]
     },
     {
@@ -94,6 +96,7 @@ let notesData = JSON.parse(localStorage.getItem("eduvault_notes")) || [
         date: "2026-08-22",
         pdf_urls: [
             "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf",
+            "https://github.com/Ashutosh-Srivastava-stack/eduvault-pdf-storage/blob/670898ca998964198e35908d3299c66ccedf6ff7/uploads/1790525490903_start_to_sprial-compressed.pdf"
         ]
     },
     {
@@ -297,7 +300,7 @@ async function handlePublishNote(e) {
     if (e && e.preventDefault) e.preventDefault();
     
     const title = $("pub-title") ? $("pub-title").value.trim() : "";
-    const category = $("pub-category") ? $("pub-category").value : "GEN"; // e.g., "SE", "PY", "ITW"
+    const category = $("pub-category") ? $("pub-category").value.trim().toUpperCase() : "GEN";
     const desc = $("pub-desc") ? $("pub-desc").value.trim() : "";
     const fileInput = $("pub-file");
     const rawUrlInput = $("pub-url") ? $("pub-url").value.trim() : "";
@@ -313,13 +316,11 @@ async function handlePublishNote(e) {
 
         let collectedUrls = [];
 
-        // 1. Parse manual input URLs
         if (rawUrlInput) {
             const parsedUrls = rawUrlInput.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
             collectedUrls.push(...parsedUrls);
         }
 
-        // 2. Upload PDF to GitHub/Server if selected
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
             if (file.type !== "application/pdf") {
@@ -334,29 +335,23 @@ async function handlePublishNote(e) {
             throw new Error("Please upload a PDF file or enter at least one PDF link.");
         }
 
-        // 3. CHECK IF A CARD WITH THIS CATEGORY ALREADY EXISTS
-        let existingNoteIndex = notesData.findIndex(n => n.category.toUpperCase() === category.toUpperCase());
+        // Match card category case-insensitively
+        let existingNoteIndex = notesData.findIndex(n => String(n.category).trim().toUpperCase() === category);
 
         if (existingNoteIndex !== -1) {
-            // APPEND LINK TO EXISTING SUBJECT CARD
             let existingNote = notesData[existingNoteIndex];
 
-            // Normalize existing URLs to an array
             if (!Array.isArray(existingNote.pdf_urls)) {
                 existingNote.pdf_urls = existingNote.pdf_url ? [existingNote.pdf_url] : [];
             }
 
-            // Push new links into the existing card
+            // Append new links
             existingNote.pdf_urls.push(...collectedUrls);
-
-            // Update description or date if provided
             if (desc) existingNote.desc = desc;
             existingNote.date = new Date().toISOString().split('T')[0];
 
-            showToast(`Added ${collectedUrls.length} new PDF link(s) to ${existingNote.title}!`, "success");
-
+            showToast(`Added link to ${existingNote.title}!`, "success");
         } else {
-            // CREATE A NEW SUBJECT CARD ONLY IF CATEGORY DOES NOT EXIST
             const newNote = {
                 id: String(Date.now()),
                 title: title || `${category} Module Notes`,
@@ -371,7 +366,7 @@ async function handlePublishNote(e) {
             showToast("Created new subject card with uploaded PDF!", "success");
         }
 
-        // 4. Save to LocalStorage and re-render UI
+        // Save updated notes to LocalStorage
         localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
 
         if (e.target && typeof e.target.reset === "function") e.target.reset();
@@ -433,7 +428,7 @@ function renderNotes() {
     `).join("");
 }
 // --- DELETE A SUBJECT CARD ---
-function deleteNoteCard(noteId) {
+/*function deleteNoteCard(noteId) {
     if (!currentUser) {
         showToast("Please sign in to perform this action.", "error");
         return;
@@ -453,7 +448,7 @@ function deleteNoteCard(noteId) {
     
     // Re-render UI cards
     renderNotes();
-}
+}*/
 
 // --- OPEN RESOURCE MODAL WITH ALL DEDICATED DOWNLOAD BUTTONS ---
 function openResourceModal(noteId) {
