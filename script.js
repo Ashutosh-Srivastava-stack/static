@@ -123,23 +123,46 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // --- LOGIN & AUTHENTICATION WITH DUAL MASTER KEYS ---
+
 function switchLoginTab(role) {
     const roleInput = $("login-role");
     const tabStudent = $("tab-student");
     const tabAdmin = $("tab-admin");
 
     if (roleInput) roleInput.value = role;
+
     if (tabStudent) {
-        tabStudent.className = role === "student" 
-            ? "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition" 
-            : "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition";
+        if (role === "student") {
+            tabStudent.className = "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer";
+        } else {
+            tabStudent.className = "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition hover:text-white cursor-pointer";
+        }
     }
+
     if (tabAdmin) {
-        tabAdmin.className = role === "admin" 
-            ? "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition" 
-            : "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition";
+        if (role === "admin") {
+            tabAdmin.className = "flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer";
+        } else {
+            tabAdmin.className = "flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition hover:text-white cursor-pointer";
+        }
     }
 }
+
+// --- DOM INITIALIZATION & EVENT LISTENERS ---
+document.addEventListener("DOMContentLoaded", () => {
+    checkSession();
+
+    // Bind login tab click events dynamically
+    const tabStudent = $("tab-student");
+    const tabAdmin = $("tab-admin");
+
+    if (tabStudent) {
+        tabStudent.addEventListener("click", () => switchLoginTab("student"));
+    }
+    if (tabAdmin) {
+        tabAdmin.addEventListener("click", () => switchLoginTab("admin"));
+    }
+});
 
 async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
