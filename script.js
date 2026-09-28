@@ -81,33 +81,12 @@ let auditLogs = JSON.parse(localStorage.getItem("eduvault_logs")) || [
     { time: "2026-09-01 09:15", user: "ADM-004", action: "Published Notes: Python Core Concepts" }
 ];
 
-// Variable to track tab selection reliably
 let activeRoleTab = "student";
 
 // --- DOM INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
     checkSession();
-    setupTabClickListeners();
 });
-
-function setupTabClickListeners() {
-    const tabStudent = $("tab-student");
-    const tabAdmin = $("tab-admin");
-
-    if (tabStudent) {
-        tabStudent.onclick = function (e) {
-            if (e) e.preventDefault();
-            switchLoginTab("student");
-        };
-    }
-
-    if (tabAdmin) {
-        tabAdmin.onclick = function (e) {
-            if (e) e.preventDefault();
-            switchLoginTab("admin");
-        };
-    }
-}
 
 // --- TAB SWITCHING ---
 function switchLoginTab(role) {
@@ -135,15 +114,16 @@ function switchLoginTab(role) {
     }
 }
 
-// --- LOGIN HANDLER ---
+// --- LOGIN HANDLER (FIXED) ---
 async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
 
     const roleInput = $("login-role");
     const role = roleInput ? roleInput.value : activeRoleTab;
 
-    const nameInput = $("loginName") || $("login-id");
-    const passInput = $("loginPass");
+    // Handles both HTML element ID options safely
+    const nameInput = $("loginName") \vert{}\vert{} $("login-id");
+    const passInput = $("loginPass") \vert{}\vert{} $("loginpass");
 
     const name = nameInput ? nameInput.value.trim() : "";
     const pass = passInput ? passInput.value.trim() : "";
@@ -153,15 +133,20 @@ async function handleLogin(e) {
         return;
     }
 
-    // Strict Password Validation per Role
+    if (!pass) {
+        showToast("Please enter your password.", "error");
+        return;
+    }
+
+    // Role-based password validation
     if (role === "admin") {
         if (pass !== ADMIN_MASTER_KEY) {
-            showToast("Invalid Admin Password! Please use ADMIN2026.", "error");
+            showToast("Invalid Admin Password! Key must be ADMIN2026.", "error");
             return;
         }
     } else {
         if (pass !== STUDENT_MASTER_KEY) {
-            showToast("Invalid Student Passkey! Please use NOTES2026.", "error");
+            showToast("Invalid Student Passkey! Key must be NOTES2026.", "error");
             return;
         }
     }
@@ -208,7 +193,7 @@ function checkSession() {
         if (loginScreen) loginScreen.classList.add("hidden-section");
         if (dashboardScreen) dashboardScreen.classList.remove("hidden-section");
 
-        const nameElem = $("user-display-name") || $("userDisplayName");
+        const nameElem = $("user-display-name") \vert{}\vert{} $("userDisplayName");
         const roleElem = $("user-display-role");
         if (nameElem) nameElem.innerText = currentUser.id;
         if (roleElem) roleElem.innerText = `Role: ${currentUser.role === 'admin' ? 'Faculty Admin' : 'Student'}`;
@@ -348,7 +333,7 @@ async function handlePublishNote(e) {
     }
 }
 
-// --- RENDER & DISPLAY NOTES ---
+// --- RENDER & DISPLAY NOTES (NO DELETE BUTTON) ---
 function renderNotes() {
     const grid = $("notes-grid");
     if (!grid) return;
@@ -370,21 +355,12 @@ function renderNotes() {
         return;
     }
 
-    const isAdmin = currentUser && currentUser.role === "admin";
-
     grid.innerHTML = filtered.map(n => `
         <div class="glass rounded-2xl p-6 note-card border border-white/5 flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center mb-3">
                     <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-violet/20 text-purple border border-violet/30">${n.category}</span>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs text-textmuted">${n.date}</span>
-                        ${isAdmin ? `
-                        <button onclick="event.stopPropagation(); deleteNoteCard('${n.id}')" title="Delete Card" class="text-textmuted hover:text-red-400 transition p-1">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
-                        </button>
-                        ` : ''}
-                    </div>
+                    <span class="text-xs text-textmuted">${n.date}</span>
                 </div>
                 <h4 class="font-bold text-lg mb-2 text-white">${n.title}</h4>
                 <p class="text-textmuted text-sm mb-4">${n.desc}</p>
@@ -392,19 +368,6 @@ function renderNotes() {
             <button onclick="openResourceModal('${n.id}')" class="w-full py-2.5 rounded-xl bg-violet/20 hover:bg-violet text-purple hover:text-white font-bold text-xs transition">View Note</button>
         </div>
     `).join("");
-}
-
-function deleteNoteCard(noteId) {
-    if (!currentUser || currentUser.role !== "admin") {
-        showToast("Admin access required to delete cards.", "error");
-        return;
-    }
-    if (!confirm("Are you sure you want to delete this subject card?")) return;
-
-    notesData = notesData.filter(n => String(n.id) !== String(noteId));
-    localStorage.setItem("eduvault_notes", JSON.stringify(notesData));
-    showToast("Subject card removed successfully.", "success");
-    renderNotes();
 }
 
 // --- RESOURCE MODAL & DOWNLOADS ---
