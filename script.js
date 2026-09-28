@@ -142,7 +142,7 @@ async function handleLogin(e) {
     const roleInput = $("login-role");
     const role = roleInput ? roleInput.value : activeRoleTab;
 
-    const nameInput = $("loginName") \vert{}\vert{} $("login-id");
+    const nameInput = $("loginName") || $("login-id");
     const passInput = $("loginPass");
 
     const name = nameInput ? nameInput.value.trim() : "";
@@ -208,7 +208,7 @@ function checkSession() {
         if (loginScreen) loginScreen.classList.add("hidden-section");
         if (dashboardScreen) dashboardScreen.classList.remove("hidden-section");
 
-        const nameElem = $("user-display-name") \vert{}\vert{} $("userDisplayName");
+        const nameElem = $("user-display-name") || $("userDisplayName");
         const roleElem = $("user-display-role");
         if (nameElem) nameElem.innerText = currentUser.id;
         if (roleElem) roleElem.innerText = `Role: ${currentUser.role === 'admin' ? 'Faculty Admin' : 'Student'}`;
