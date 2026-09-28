@@ -152,38 +152,26 @@
                 <h2 class="text-3xl sm:text-4xl font-bold">Tech Titans Library Portal</h2>
             </div>
 
-<!-- LOGIN MODAL / BOX -->
-<div id="login-screen" class="glass p-8 rounded-3xl max-w-md w-full border border-white/10">
-    <!-- ROLE TAB SELECTOR -->
-    <div class="flex bg-black/30 p-1.5 rounded-2xl mb-6 border border-white/5">
-        <button type="button" id="tab-student" onclick="switchLoginTab('student')" class="flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition cursor-pointer">
-            Student Access
-        </button>
-        <button type="button" id="tab-admin" onclick="switchLoginTab('admin')" class="flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition hover:text-white cursor-pointer">
-            Admin Access
-        </button>
-    </div>
+ <!-- LOGIN SCREEN -->
+            <div id="login-screen" class="max-w-md mx-auto glass rounded-3xl p-7 sm:p-9 shadow-glow">
+                <div class="flex bg-ink rounded-2xl p-1.5 mb-7">
+                    <button id="tab-student" onclick="switchLoginTab('student')" class="flex-1 py-3 rounded-xl bg-violet text-white font-bold text-sm transition">Student</button>
+                    <button id="tab-admin" onclick="switchLoginTab('admin')" class="flex-1 py-3 rounded-xl text-textmuted font-bold text-sm transition">Admin / Faculty</button>
+                </div>
 
-    <!-- FORM -->
-    <form onsubmit="handleLogin(event)">
-        <!-- HIDDEN ROLE TRACKER -->
-        <input type="hidden" id="login-role" value="student" />
-
-        <div class="mb-4">
-            <label class="block text-xs text-textmuted font-bold mb-2">User Name / ID</label>
-            <input type="text" id="loginName" required placeholder="e.g. STU-8821 or Admin Name" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet" />
-        </div>
-
-        <div class="mb-6">
-            <label class="block text-xs text-textmuted font-bold mb-2">Access Key / Password</label>
-            <input type="password" id="loginPass" required placeholder="••••••••" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet" />
-        </div>
-
-        <button type="submit" class="w-full py-3.5 rounded-xl bg-violet hover:bg-violet/80 text-white font-bold text-sm transition">
-            Sign In
-        </button>
-    </form>
-</div>
+                <form onsubmit="handleLogin(event)" class="space-y-5">
+                    <input type="hidden" id="login-role" value="student">
+                    <div>
+                        <label id="id-label" class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">Email Address / User ID</label>
+                        <input type="email" id="login-id" required placeholder="user@university.edu" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-textmuted mb-2">Password</label>
+                        <input type="password" id="login-pass" required placeholder="••••••••" class="w-full bg-ink/70 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet text-sm">
+                    </div>
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-violet to-purple text-white font-bold shadow-glow hover:opacity-95 transition">Enter Portal</button>
+                </form>
+            </div>
 
             <!-- DASHBOARD CONTAINER -->
             <div id="dashboard-screen" class="hidden-section max-w-6xl mx-auto">
