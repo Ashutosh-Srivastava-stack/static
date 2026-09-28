@@ -122,8 +122,8 @@ async function handleLogin(e) {
     const role = roleInput ? roleInput.value : activeRoleTab;
 
     // Handles both HTML element ID options safely
-    const nameInput = $("loginName") \vert{}\vert{} $("login-id");
-    const passInput = $("loginPass") \vert{}\vert{} $("loginpass");
+    const nameInput = $("loginName") || $("login-id");
+    const passInput = $("loginPass") || $("loginpass");
 
     const name = nameInput ? nameInput.value.trim() : "";
     const pass = passInput ? passInput.value.trim() : "";
@@ -141,12 +141,12 @@ async function handleLogin(e) {
     // Role-based password validation
     if (role === "admin") {
         if (pass !== ADMIN_MASTER_KEY) {
-            showToast("Invalid Admin Password! Key must be ADMIN2026.", "error");
+            showToast("Invalid Admin Password!", "error");
             return;
         }
     } else {
         if (pass !== STUDENT_MASTER_KEY) {
-            showToast("Invalid Student Passkey! Key must be NOTES2026.", "error");
+            showToast("Invalid Student Passkey!", "error");
             return;
         }
     }
@@ -193,7 +193,7 @@ function checkSession() {
         if (loginScreen) loginScreen.classList.add("hidden-section");
         if (dashboardScreen) dashboardScreen.classList.remove("hidden-section");
 
-        const nameElem = $("user-display-name") \vert{}\vert{} $("userDisplayName");
+        const nameElem = $("user-display-name") || $("userDisplayName");
         const roleElem = $("user-display-role");
         if (nameElem) nameElem.innerText = currentUser.id;
         if (roleElem) roleElem.innerText = `Role: ${currentUser.role === 'admin' ? 'Faculty Admin' : 'Student'}`;
