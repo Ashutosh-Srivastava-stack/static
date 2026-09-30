@@ -49,3 +49,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb', // Adjust up to 4.5MB (standard limit) or use direct uploads
+    },
+  },
+};
