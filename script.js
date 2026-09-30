@@ -1,6 +1,11 @@
 /* ==========================================================================
    TECH TITANS LIBRARY - FIREBOOK CONTROLLER
    ========================================================================== */
+// At the top of script.js
+const SUPABASE_URL = "https://pkpdrxgspxxgafsnlqua.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrcGRyeGdzcHh4Z2Fmc25scXVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NzYyMDksImV4cCI6MjEwNjM1MjIwOX0.FzMLLIh2kYQTuOHJvHkoCOUlyzIdT9EuTh6gD_xKL90";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const STUDENT_MASTER_KEY = "NOTES2026";
 const ADMIN_MASTER_KEY = "ADMIN2026";
@@ -240,37 +245,40 @@ function handleLogout() {
     checkSession();
 }
 
-// --- GITHUB UPLOAD ---
-async function uploadPdfToGitHub(file) {
-    const base64Content = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const result = reader.result;
-            const base64 = result.includes(',') ? result.split(',')[1] : result;
-            resolve(base64);
-        };
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
+// --- SUPABASE UPLOAD ---
+/**
+ * Uploads a PDF file directly to Supabase Storage bucket.
+ * Bypasses Vercel's 4.5MB payload limit.
+ * @param {File} file - The file object from input element.
+ * @returns {Promise<string>} Public URL of the uploaded file.
+ */
+async function uploadPdfToSupabase(file) {
+    // 1. Sanitize filename and build unique path
+    const fileExt = file.name.split('.').pop();
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `${Date.now()}_${sanitizedName}.${fileExt}`;
+    const filePath = `uploads/${fileName}`;
 
-    const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: file.name, base64Content: base64Content })
-    });
+    // 2. Direct upload to Supabase Storage
+    const { data, error } = await supabaseClient
+        .storage
+        .from('pdf-notes')
+        .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+        });
 
-    const contentType = response.headers.get("content-type");
-    if (!response.ok) {
-        if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "GitHub upload failed.");
-        } else {
-            throw new Error(`Upload server error: ${response.status}`);
-        }
+    if (error) {
+        throw new Error(`Supabase upload failed: ${error.message}`);
     }
 
-    const data = await response.json();
-    return data.url;
+    // 3. Fetch the public download URL
+    const { data: urlData } = supabaseClient
+        .storage
+        .from('pdf-notes')
+        .getPublicUrl(filePath);
+
+    return urlData.publicUrl;
 }
 
 // --- PUBLISH NOTE ---
@@ -304,7 +312,8 @@ async function handlePublishNote(e) {
             if (file.type !== "application/pdf") {
                 throw new Error("Only PDF documents are allowed.");
             }
-            const uploadedUrl = await uploadPdfToGitHub(file);
+            // Direct client-side upload to Supabase Storage
+            const uploadedUrl = await uploadPdfToSupabase(file);
             collectedUrls.push(uploadedUrl);
         }
 
